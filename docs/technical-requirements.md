@@ -1,40 +1,41 @@
 # Technical Requirements
 
-## Frontend
+## Application
 
-- **Framework:** Next.js (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **State Management:** Zustand or React Query
-- **Auth:** NextAuth.js
+- **Framework:** Django
+- **Language:** Python 3.12+
+- **UI:** Django templates + HTMX (progressive enhancement)
+- **Styling:** Tailwind CSS (via django-tailwind or static build)
+- **API (where needed):** Django REST Framework
+- **Auth:** Django auth + django-allauth (email + Instagram OAuth)
 
 ## Backend
 
-- **Runtime:** Node.js
-- **Framework:** Express.js or Fastify
-- **Language:** TypeScript
-- **Architecture:** Clean architecture with feature-based structure
-- **ORM:** Prisma
+- **Architecture:** Django apps per feature (chats, clients, orders, notifications)
+- **ORM:** Django ORM
+- **Background jobs:** Celery + Redis (message sync, reminders)
+- **Real-time updates:** Django Channels or HTMX polling (inbox refresh)
 
 ## Database
 
 - **Primary DB:** PostgreSQL
-- **Migrations:** Prisma Migrate
+- **Migrations:** Django migrations (`manage.py migrate`)
 
 ## Infrastructure
 
-- **Hosting:** Vercel (frontend), Railway or Render (backend)
-- **Environment:** .env files with separate configs for dev/prod
+- **Hosting:** Railway, Render, or Fly.io
+- **Static files:** WhiteNoise or object storage (S3-compatible)
+- **Environment:** `.env` files with separate configs for dev/prod
 
 ## Integrations
 
 - **Instagram API:** Meta Graph API for reading and sending DMs
-- **Webhooks:** For real-time message sync from Instagram
+- **Webhooks:** Django views for real-time message sync from Instagram
 
 ## Code Standards
 
-- TypeScript everywhere — no plain JS
-- Clean architecture — separation of concerns
-- Feature-based folder structure
-- Reusable components
-- Server Actions where possible
+- Python everywhere — follow PEP 8
+- Feature-based Django app structure
+- Reusable template components (partials)
+- Type hints where practical
+- Tests with pytest-django
