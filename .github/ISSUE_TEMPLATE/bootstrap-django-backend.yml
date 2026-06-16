@@ -1,0 +1,48 @@
+name: Bootstrap Django backend
+description: Set up the initial Django + DRF backend project
+title: "Bootstrap Django backend project"
+labels:
+  - enhancement
+  - backend
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Set up the initial Django backend for Replyo (MicroCRM) according to [technical requirements](../docs/technical-requirements.md).
+
+        The repo currently contains planning docs only — this issue tracks bootstrapping the backend so frontend and Instagram integration work can build on a stable API foundation.
+
+  - type: checkboxes
+    id: tasks
+    attributes:
+      label: Tasks
+      options:
+        - label: Create Python project with Django 5.x and Django REST Framework
+        - label: Configure PostgreSQL connection and Django migrations
+        - label: Add environment-based settings (`.env` for dev, documented variables)
+        - label: Organize code into feature-based Django apps (e.g. `accounts`, `clients`, `messages`)
+        - label: Add a health-check API endpoint (`GET /api/health/`)
+        - label: Add `README` section with local setup steps (venv, migrate, runserver)
+        - label: Add basic project tooling (e.g. `requirements.txt` or `pyproject.toml`, `.gitignore` for Python)
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - `python manage.py runserver` starts without errors
+        - Database migrations apply cleanly against local PostgreSQL
+        - Health endpoint returns 200 with a JSON status payload
+        - Project structure matches the feature-based app layout in the tech requirements
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      value: |
+        - `docs/technical-requirements.md`
+        - `docs/project-overview.md`
+    validations:
+      required: false

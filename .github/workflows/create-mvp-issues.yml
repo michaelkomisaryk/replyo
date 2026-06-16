@@ -1,0 +1,19 @@
+name: Create MVP Issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create MVP issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/create_mvp_issues.py
