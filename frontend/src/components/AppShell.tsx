@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -12,6 +15,8 @@ const navItems = [
 ];
 
 export function AppShell({ children }: AppShellProps) {
+  const { data: session } = useSession();
+
   return (
     <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
       <aside className="flex w-64 flex-col border-r border-zinc-200 bg-white">
@@ -40,8 +45,17 @@ export function AppShell({ children }: AppShellProps) {
             <p className="text-sm text-zinc-500">Instagram shop CRM</p>
             <h2 className="text-lg font-semibold">Dashboard</h2>
           </div>
-          <div className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
-            MVP shell
+          <div className="flex items-center gap-3">
+            {session?.user?.email && (
+              <span className="text-sm text-zinc-600">{session.user.email}</span>
+            )}
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-white transition hover:bg-zinc-700"
+            >
+              Log out
+            </button>
           </div>
         </header>
         <main className="flex-1 p-6">{children}</main>

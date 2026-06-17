@@ -36,10 +36,12 @@ class User(AbstractUser):
         choices=UserRole.choices,
         default=UserRole.ADMIN,
     )
+    is_email_verified = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
             models.Index(fields=["shop", "role"]),
+            models.Index(fields=["email"]),
         ]
 
     def __str__(self) -> str:

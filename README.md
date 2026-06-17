@@ -86,7 +86,19 @@ npm run dev
 
 Open `http://127.0.0.1:3000`. The dashboard shell should render and show backend connection status from `/api/health/`.
 
+Copy `frontend/.env.example` to `frontend/.env.local` and set `NEXTAUTH_SECRET` before running the frontend.
+
+Unauthenticated users are redirected to `/login`. Sign up at `/signup`, verify email via `/verify-email`, then sign in.
+
 ## API (read endpoints)
+
+Auth endpoints:
+
+- `POST /api/auth/register/`
+- `POST /api/auth/verify-email/`
+- `POST /api/auth/login/`
+- `POST /api/auth/logout/`
+- `GET /api/auth/me/`
 
 With the backend running:
 

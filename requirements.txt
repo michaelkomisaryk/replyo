@@ -1,5 +1,6 @@
 django>=5.0,<6.0
 djangorestframework
+djangorestframework-simplejwt
 python-dotenv
 dj-database-url
 psycopg[binary]
