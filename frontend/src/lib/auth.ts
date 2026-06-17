@@ -3,6 +3,17 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
+function getAuthSecret(): string {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (secret) {
+    return secret;
+  }
+  if (process.env.NODE_ENV === "development") {
+    return "dev-local-secret-change-in-production";
+  }
+  throw new Error("NEXTAUTH_SECRET is required in production.");
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -64,5 +75,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: getAuthSecret(),
 };
