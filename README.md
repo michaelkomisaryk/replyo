@@ -1,6 +1,10 @@
-## Replyo Backend Setup
+## Replyo Setup
 
-This repository includes a Django backend scaffold in `backend/`.
+This repository includes:
+- Django backend in `backend/`
+- Next.js frontend in `frontend/`
+
+## Backend
 
 ### 1) Create virtual environment
 
@@ -39,7 +43,7 @@ If `DATABASE_URL` is not set, Django uses local SQLite for quick bootstrapping.
 python backend/manage.py migrate
 ```
 
-### 5) Start server
+### 5) Start backend server
 
 ```bash
 python backend/manage.py runserver
@@ -52,3 +56,32 @@ python backend/manage.py runserver
 ```json
 {"status":"ok"}
 ```
+
+## Frontend
+
+### 1) Install dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+### 2) Configure environment
+
+```bash
+cp .env.example .env.local
+```
+
+Default API URL:
+
+```bash
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+```
+
+### 3) Start frontend server
+
+```bash
+npm run dev
+```
+
+Open `http://127.0.0.1:3000`. The dashboard shell should render and show backend connection status from `/api/health/`.

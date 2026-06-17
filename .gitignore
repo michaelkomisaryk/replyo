@@ -8,3 +8,10 @@ __pycache__/
 # Django static/media
 staticfiles/
 media/
+
+# Node / Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.local

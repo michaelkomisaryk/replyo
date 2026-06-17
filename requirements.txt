@@ -3,3 +3,4 @@ djangorestframework
 python-dotenv
 dj-database-url
 psycopg[binary]
+django-cors-headers
