@@ -85,3 +85,14 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:3000`. The dashboard shell should render and show backend connection status from `/api/health/`.
+
+## API (read endpoints)
+
+With the backend running:
+
+- `GET /api/shops/`
+- `GET /api/users/`
+- `GET /api/clients/`
+- `GET /api/chats/`
+- `GET /api/messages/`
+- `GET /api/orders/`
