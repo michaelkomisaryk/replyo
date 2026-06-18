@@ -14,6 +14,7 @@ class ChatSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     priority_label = serializers.CharField(source="get_priority_display", read_only=True)
+    assigned_to_email = serializers.SerializerMethodField()
     wait_seconds = serializers.SerializerMethodField()
     wait_urgency = serializers.SerializerMethodField()
 
@@ -26,6 +27,7 @@ class ChatSerializer(serializers.ModelSerializer):
             "client_username",
             "client_display_name",
             "assigned_to",
+            "assigned_to_email",
             "priority",
             "priority_label",
             "is_pinned",
@@ -37,6 +39,11 @@ class ChatSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+    def get_assigned_to_email(self, chat: Chat) -> str | None:
+        if chat.assigned_to_id:
+            return chat.assigned_to.email
+        return None
 
     def get_wait_seconds(self, chat: Chat) -> int | None:
         return get_wait_seconds(chat)

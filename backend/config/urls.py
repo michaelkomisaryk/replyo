@@ -29,6 +29,8 @@ from apps.common.views import health_check
 from apps.messages.views import (
     ChatArchiveSearchView,
     ChatArchiveView,
+    ChatAssignView,
+    ChatEscalateView,
     ChatNotificationListView,
     ChatPinView,
     ChatPrioritiesView,
@@ -120,6 +122,16 @@ urlpatterns = [
         "api/chats/<int:chat_id>/archive/",
         ChatArchiveView.as_view(),
         name="chat-archive",
+    ),
+    path(
+        "api/chats/<int:chat_id>/assign/",
+        ChatAssignView.as_view(),
+        name="chat-assign",
+    ),
+    path(
+        "api/chats/<int:chat_id>/escalate/",
+        ChatEscalateView.as_view(),
+        name="chat-escalate",
     ),
     path(
         "api/notifications/",

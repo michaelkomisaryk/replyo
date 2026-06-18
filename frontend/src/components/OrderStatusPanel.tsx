@@ -92,69 +92,73 @@ export function OrderStatusPanel({
 
   if (isLoading) {
     return (
-      <section className="border-b border-zinc-200 bg-zinc-50 px-5 py-3">
+      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
         <p className="text-xs text-zinc-500">Loading order status...</p>
       </section>
     );
   }
 
   return (
-    <section className="border-b border-zinc-200 bg-zinc-50 px-5 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Order status
-          </p>
-          {chatPriority && (
-            <p className="mt-1 text-xs text-zinc-600">
-              Chat priority: {PRIORITY_LABELS[chatPriority] ?? chatPriority}
+    <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <div className="border-b border-zinc-200 px-5 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Order status
             </p>
+            {chatPriority && (
+              <p className="mt-1 text-xs text-zinc-600">
+                Chat priority: {PRIORITY_LABELS[chatPriority] ?? chatPriority}
+              </p>
+            )}
+          </div>
+
+          {canManage && !activeOrder && (
+            <button
+              type="button"
+              onClick={handleCreateOrder}
+              disabled={loading}
+              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60"
+            >
+              {loading ? "Creating..." : "Create order"}
+            </button>
           )}
         </div>
-
-        {canManage && !activeOrder && (
-          <button
-            type="button"
-            onClick={handleCreateOrder}
-            disabled={loading}
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60"
-          >
-            {loading ? "Creating..." : "Create order"}
-          </button>
-        )}
       </div>
 
-      {activeOrder ? (
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="text-sm font-medium text-zinc-900">
-            Order #{activeOrder.id}
-          </span>
-          {canManage ? (
-            <select
-              value={activeOrder.status}
-              disabled={loading}
-              onChange={(event) =>
-                handleStatusChange(activeOrder, event.target.value)
-              }
-              className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm outline-none focus:border-zinc-500"
-            >
-              {ORDER_STATUSES.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="rounded-full bg-white px-2 py-0.5 text-xs text-zinc-700 ring-1 ring-zinc-200">
-              {activeOrder.status_label}
+      <div className="px-5 py-3">
+        {activeOrder ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium text-zinc-900">
+              Order #{activeOrder.id}
             </span>
-          )}
-        </div>
-      ) : (
-        <p className="mt-2 text-sm text-zinc-600">No active order for this chat.</p>
-      )}
+            {canManage ? (
+              <select
+                value={activeOrder.status}
+                disabled={loading}
+                onChange={(event) =>
+                  handleStatusChange(activeOrder, event.target.value)
+                }
+                className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm outline-none focus:border-zinc-500"
+              >
+                {ORDER_STATUSES.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700 ring-1 ring-zinc-200">
+                {activeOrder.status_label}
+              </span>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-600">No active order for this chat.</p>
+        )}
 
-      {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
+        {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
+      </div>
     </section>
   );
 }

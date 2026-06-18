@@ -22,4 +22,9 @@ class UserViewSet(ShopQuerysetMixin, viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if user.role == UserRole.ADMIN:
             return queryset
+        if (
+            user.role == UserRole.MANAGER
+            and self.request.query_params.get("team") == "1"
+        ):
+            return queryset
         return queryset.filter(pk=user.pk)

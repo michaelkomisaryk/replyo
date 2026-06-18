@@ -67,6 +67,7 @@ export type Chat = {
   client_username: string;
   client_display_name: string;
   assigned_to: number | null;
+  assigned_to_email: string | null;
   priority: string;
   priority_label: string;
   wait_seconds: number | null;
@@ -322,6 +323,57 @@ export async function fetchChatPriorities(
   accessToken: string,
 ): Promise<ChatPrioritiesResponse> {
   return authFetch("/api/chats/priorities/", accessToken) as Promise<ChatPrioritiesResponse>;
+}
+
+export type TeamMember = {
+  id: number;
+  email: string;
+  role: string;
+  username: string;
+};
+
+export async function fetchTeamMembers(accessToken: string): Promise<TeamMember[]> {
+  return authFetch("/api/users/?team=1", accessToken) as Promise<TeamMember[]>;
+}
+
+export async function pinChat(
+  accessToken: string,
+  chatId: number,
+  pinned: boolean,
+): Promise<Chat> {
+  return authFetch(`/api/chats/${chatId}/pin/`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ pinned }),
+  }) as Promise<Chat>;
+}
+
+export async function archiveChat(
+  accessToken: string,
+  chatId: number,
+): Promise<Chat> {
+  return authFetch(`/api/chats/${chatId}/archive/`, accessToken, {
+    method: "POST",
+  }) as Promise<Chat>;
+}
+
+export async function assignChat(
+  accessToken: string,
+  chatId: number,
+  assignedTo: number | null,
+): Promise<Chat> {
+  return authFetch(`/api/chats/${chatId}/assign/`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ assigned_to: assignedTo }),
+  }) as Promise<Chat>;
+}
+
+export async function escalateChat(
+  accessToken: string,
+  chatId: number,
+): Promise<Chat> {
+  return authFetch(`/api/chats/${chatId}/escalate/`, accessToken, {
+    method: "POST",
+  }) as Promise<Chat>;
 }
 
 export async function fetchChat(

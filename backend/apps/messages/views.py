@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.models import UserRole
+from apps.accounts.models import User, UserRole
 from apps.common.permissions import ChatPermission, IsAdminOrManager, IsShopMember
 from apps.common.viewsets import ChatQuerysetMixin
 from apps.integrations.outbound_sync import OutboundSendError, send_chat_reply
@@ -189,6 +189,57 @@ class ChatArchiveView(APIView):
             id=chat_id,
         )
         archive_chat(chat)
+        return Response(ChatSerializer(chat, context={"request": request}).data)
+
+
+class ChatAssignView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrManager]
+
+    def post(self, request, chat_id: int):
+        chat = get_object_or_404(
+            Chat.objects.select_related("assigned_to").filter(shop=request.user.shop),
+            id=chat_id,
+        )
+        assigned_to = request.data.get("assigned_to")
+
+        if assigned_to in (None, "", 0, "0"):
+            chat.assigned_to = None
+        else:
+            assignee = get_object_or_404(
+                User.objects.filter(shop=request.user.shop, is_active=True),
+                id=assigned_to,
+            )
+            chat.assigned_to = assignee
+
+        chat.save(update_fields=["assigned_to", "updated_at"])
+        chat = Chat.objects.select_related("assigned_to", "client", "shop").get(
+            pk=chat.pk
+        )
+        return Response(ChatSerializer(chat, context={"request": request}).data)
+
+
+class ChatEscalateView(APIView):
+    permission_classes = [IsAuthenticated, IsShopMember]
+
+    def post(self, request, chat_id: int):
+        if request.user.role != UserRole.SUPPORT_MANAGER:
+            return Response(
+                {"detail": "Only support managers can escalate chats."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        chat = get_object_or_404(
+            Chat.objects.select_related("assigned_to").filter(
+                shop=request.user.shop,
+                assigned_to=request.user,
+            ),
+            id=chat_id,
+        )
+        chat.assigned_to = None
+        chat.save(update_fields=["assigned_to", "updated_at"])
+        chat = Chat.objects.select_related("assigned_to", "client", "shop").get(
+            pk=chat.pk
+        )
         return Response(ChatSerializer(chat, context={"request": request}).data)
 
 
