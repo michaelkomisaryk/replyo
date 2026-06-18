@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from apps.accounts.invitations import TeamInvitation
 from apps.accounts.models import Shop, User
 from apps.accounts.tokens import EmailVerificationToken
 
@@ -29,3 +30,10 @@ class UserAdmin(admin.ModelAdmin):
 class EmailVerificationTokenAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "token", "expires_at", "created_at")
     search_fields = ("user__email", "token")
+
+
+@admin.register(TeamInvitation)
+class TeamInvitationAdmin(admin.ModelAdmin):
+    list_display = ("id", "shop", "email", "role", "accepted_at", "expires_at")
+    list_filter = ("shop", "role", "accepted_at")
+    search_fields = ("email", "token")

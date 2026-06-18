@@ -9,6 +9,11 @@ from apps.accounts.auth_views import (
     RegisterView,
     VerifyEmailView,
 )
+from apps.accounts.onboarding_views import (
+    AcceptInvitationView,
+    InvitationListCreateView,
+    OnboardingView,
+)
 from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientViewSet
 from apps.common.views import health_check
@@ -31,5 +36,12 @@ urlpatterns = [
     path("api/auth/logout/", LogoutView.as_view(), name="auth-logout"),
     path("api/auth/me/", MeView.as_view(), name="auth-me"),
     path("api/auth/verify-email/", VerifyEmailView.as_view(), name="auth-verify-email"),
+    path("api/onboarding/", OnboardingView.as_view(), name="onboarding"),
+    path("api/invitations/", InvitationListCreateView.as_view(), name="invitations"),
+    path(
+        "api/invitations/accept/",
+        AcceptInvitationView.as_view(),
+        name="invitations-accept",
+    ),
     path("api/", include(router.urls)),
 ]

@@ -19,6 +19,52 @@ export type RegisterResponse = {
   debug_verification_url?: string;
 };
 
+export type OnboardingStep = {
+  id: string;
+  label: string;
+  completed: boolean;
+  placeholder: boolean;
+};
+
+export type OnboardingChecklist = {
+  steps: OnboardingStep[];
+  completed_count: number;
+  total_count: number;
+  is_complete: boolean;
+};
+
+export type TeamInvitation = {
+  id: number;
+  email: string;
+  role: string;
+  accepted_at: string | null;
+  expires_at: string;
+  created_at: string;
+  debug_accept_url?: string;
+};
+
+async function authFetch(path: string, accessToken: string, options: RequestInit = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      ...(options.headers ?? {}),
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail =
+      typeof data.detail === "string"
+        ? data.detail
+        : Object.values(data).flat().join(", ") || "Request failed.";
+    throw new Error(detail);
+  }
+
+  return data;
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const response = await fetch(`${API_BASE_URL}/api/health/`, {
     cache: "no-store",
@@ -63,6 +109,47 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
   }
 
   return data as { message: string };
+}
+
+export async function fetchOnboarding(
+  accessToken: string,
+): Promise<OnboardingChecklist> {
+  return authFetch("/api/onboarding/", accessToken) as Promise<OnboardingChecklist>;
+}
+
+export async function inviteTeamMember(
+  accessToken: string,
+  input: { email: string; role: "manager" | "support_manager" },
+): Promise<TeamInvitation> {
+  return authFetch("/api/invitations/", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  }) as Promise<TeamInvitation>;
+}
+
+export async function acceptInvitation(input: {
+  token: string;
+  password: string;
+}): Promise<{
+  message: string;
+  access: string;
+  refresh: string;
+  user: AuthUser;
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/invitations/accept/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.token?.[0] ?? data.detail ?? "Failed to accept invitation.",
+    );
+  }
+
+  return data;
 }
 
 export { API_BASE_URL };
