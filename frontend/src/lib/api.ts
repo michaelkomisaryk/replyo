@@ -137,6 +137,15 @@ export type ClientCard = {
   updated_at: string;
 };
 
+export type ClientSearchResult = {
+  id: number;
+  instagram_username: string;
+  display_name: string;
+  chat_id: number | null;
+  is_archived: boolean;
+  assigned_to_email: string | null;
+};
+
 export type Order = {
   id: number;
   shop: number;
@@ -450,6 +459,17 @@ export async function fetchClientCard(
     `/api/clients/${clientId}/card/`,
     accessToken,
   ) as Promise<ClientCard>;
+}
+
+export async function searchClients(
+  accessToken: string,
+  query: string,
+): Promise<ClientSearchResult[]> {
+  const params = new URLSearchParams({ q: query });
+  return authFetch(
+    `/api/clients/search/?${params.toString()}`,
+    accessToken,
+  ) as Promise<ClientSearchResult[]>;
 }
 
 export async function updateClientNotes(

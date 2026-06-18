@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.clients.models import Client
+from apps.clients.search import search_clients
 from apps.clients.serializers import (
     ClientCardSerializer,
     ClientNotesUpdateSerializer,
+    ClientSearchResultSerializer,
     ClientSerializer,
 )
 from apps.common.permissions import ClientPermission, IsAdminOrManager, IsShopMember
@@ -51,3 +53,20 @@ class ClientCardView(APIView):
         serializer.save()
         card = ClientCardSerializer(client, context={"request": request})
         return Response(card.data)
+
+
+class ClientSearchView(APIView):
+    permission_classes = [IsShopMember]
+
+    def get(self, request):
+        query = request.query_params.get("q", "").strip()
+        if len(query) < 2:
+            return Response([])
+
+        results = search_clients(
+            shop=request.user.shop,
+            user=request.user,
+            query=query,
+        )
+        serializer = ClientSearchResultSerializer(results, many=True)
+        return Response(serializer.data)

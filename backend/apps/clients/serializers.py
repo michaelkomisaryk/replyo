@@ -66,3 +66,12 @@ class ClientNotesUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ["notes"]
+
+
+class ClientSearchResultSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    instagram_username = serializers.CharField()
+    display_name = serializers.CharField()
+    chat_id = serializers.IntegerField(allow_null=True)
+    is_archived = serializers.BooleanField()
+    assigned_to_email = serializers.CharField(allow_null=True)

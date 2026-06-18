@@ -24,7 +24,7 @@ from apps.integrations.views import (
 )
 from apps.integrations.webhook_views import InstagramWebhookView
 from apps.accounts.views import ShopViewSet, UserViewSet
-from apps.clients.views import ClientCardView, ClientViewSet
+from apps.clients.views import ClientCardView, ClientSearchView, ClientViewSet
 from apps.common.views import health_check
 from apps.messages.views import (
     ChatArchiveSearchView,
@@ -137,6 +137,11 @@ urlpatterns = [
         "api/notifications/",
         ChatNotificationListView.as_view(),
         name="chat-notifications",
+    ),
+    path(
+        "api/clients/search/",
+        ClientSearchView.as_view(),
+        name="client-search",
     ),
     path(
         "api/clients/<int:client_id>/card/",

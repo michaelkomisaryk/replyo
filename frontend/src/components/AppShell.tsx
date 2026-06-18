@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
 import { InstagramConnectionBadge } from "@/components/InstagramConnectionBadge";
+import { ClientSearchBar } from "@/components/ClientSearchBar";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -53,12 +54,14 @@ export function AppShell({ children }: AppShellProps) {
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
+        <header className="flex flex-col gap-4 border-b border-zinc-200 bg-white px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm text-zinc-500">Instagram shop CRM</p>
             <h2 className="text-lg font-semibold">{pageTitle}</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-1 flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-center lg:justify-end">
+            <ClientSearchBar />
+            <div className="flex items-center gap-3">
             <InstagramConnectionBadge />
             {session?.user?.email && (
               <span className="text-sm text-zinc-600">{session.user.email}</span>
@@ -70,6 +73,7 @@ export function AppShell({ children }: AppShellProps) {
             >
               Log out
             </button>
+            </div>
           </div>
         </header>
         <main className="flex-1 p-6">{children}</main>
