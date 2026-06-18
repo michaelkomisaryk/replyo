@@ -92,6 +92,28 @@ export type SendReplyError = {
   message?: Message;
 };
 
+export type ClientOrderSummary = {
+  id: number;
+  status: string;
+  status_label: string;
+  chat: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ClientCard = {
+  id: number;
+  shop: number;
+  instagram_username: string;
+  instagram_user_id: string;
+  display_name: string;
+  notes: string;
+  orders: ClientOrderSummary[];
+  can_edit: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 async function authFetch(path: string, accessToken: string, options: RequestInit = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -298,6 +320,27 @@ export async function sendChatReplySafe(
   }
 
   return { ok: true, message: data as Message };
+}
+
+export async function fetchClientCard(
+  accessToken: string,
+  clientId: number,
+): Promise<ClientCard> {
+  return authFetch(
+    `/api/clients/${clientId}/card/`,
+    accessToken,
+  ) as Promise<ClientCard>;
+}
+
+export async function updateClientNotes(
+  accessToken: string,
+  clientId: number,
+  notes: string,
+): Promise<ClientCard> {
+  return authFetch(`/api/clients/${clientId}/card/`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ notes }),
+  }) as Promise<ClientCard>;
 }
 
 export { API_BASE_URL };

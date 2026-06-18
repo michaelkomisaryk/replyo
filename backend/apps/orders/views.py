@@ -15,5 +15,12 @@ class OrderViewSet(ShopQuerysetMixin, viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [OrderPermission]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        client_id = self.request.query_params.get("client")
+        if client_id:
+            queryset = queryset.filter(client_id=client_id)
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(shop=self.request.user.shop)

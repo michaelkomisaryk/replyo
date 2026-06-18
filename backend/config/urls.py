@@ -24,7 +24,7 @@ from apps.integrations.views import (
 )
 from apps.integrations.webhook_views import InstagramWebhookView
 from apps.accounts.views import ShopViewSet, UserViewSet
-from apps.clients.views import ClientViewSet
+from apps.clients.views import ClientCardView, ClientViewSet
 from apps.common.views import health_check
 from apps.messages.views import ChatReplyView, ChatViewSet, MessageViewSet
 from apps.orders.views import OrderViewSet
@@ -91,6 +91,11 @@ urlpatterns = [
         "api/chats/<int:chat_id>/reply/",
         ChatReplyView.as_view(),
         name="chat-reply",
+    ),
+    path(
+        "api/clients/<int:client_id>/card/",
+        ClientCardView.as_view(),
+        name="client-card",
     ),
     path("api/", include(router.urls)),
 ]
