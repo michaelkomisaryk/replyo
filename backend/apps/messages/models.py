@@ -34,12 +34,17 @@ class Chat(TimeStampedModel):
         choices=Priority.choices,
         default=Priority.NEW_CLIENTS,
     )
+    is_pinned = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    has_new_message_badge = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
             models.Index(fields=["shop", "client"]),
             models.Index(fields=["shop", "assigned_to"]),
             models.Index(fields=["shop", "priority"]),
+            models.Index(fields=["shop", "is_archived"]),
         ]
 
     def __str__(self) -> str:
@@ -92,3 +97,37 @@ class Message(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.direction} message at {self.sent_at}"
+
+
+class ChatNotification(TimeStampedModel):
+    class Kind(models.TextChoices):
+        CHAT_REACTIVATED = "chat_reactivated", "Chat Reactivated"
+
+    shop = models.ForeignKey(
+        "accounts.Shop",
+        on_delete=models.CASCADE,
+        related_name="chat_notifications",
+    )
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="chat_notifications",
+    )
+    kind = models.CharField(max_length=32, choices=Kind.choices)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "is_read"]),
+            models.Index(fields=["shop", "created_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.kind} for chat {self.chat_id}"

@@ -27,6 +27,10 @@ from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientCardView, ClientViewSet
 from apps.common.views import health_check
 from apps.messages.views import (
+    ChatArchiveSearchView,
+    ChatArchiveView,
+    ChatNotificationListView,
+    ChatPinView,
     ChatPrioritiesView,
     ChatReplyView,
     ChatViewSet,
@@ -101,6 +105,26 @@ urlpatterns = [
         "api/chats/priorities/",
         ChatPrioritiesView.as_view(),
         name="chat-priorities",
+    ),
+    path(
+        "api/chats/archive/search/",
+        ChatArchiveSearchView.as_view(),
+        name="chat-archive-search",
+    ),
+    path(
+        "api/chats/<int:chat_id>/pin/",
+        ChatPinView.as_view(),
+        name="chat-pin",
+    ),
+    path(
+        "api/chats/<int:chat_id>/archive/",
+        ChatArchiveView.as_view(),
+        name="chat-archive",
+    ),
+    path(
+        "api/notifications/",
+        ChatNotificationListView.as_view(),
+        name="chat-notifications",
     ),
     path(
         "api/clients/<int:client_id>/card/",

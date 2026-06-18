@@ -35,6 +35,7 @@ class Order(TimeStampedModel):
         choices=OrderStatus.choices,
         default=OrderStatus.NEW_CLIENT,
     )
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from django.utils import timezone
+
 from apps.messages.models import Chat
 from apps.orders.models import Order, OrderStatus, OrderStatusChange
 
@@ -38,7 +40,16 @@ def update_order_status(*, order: Order, new_status: str, changed_by) -> Order:
         return order
 
     order.status = new_status
-    order.save(update_fields=["status", "updated_at"])
+    update_fields = ["status", "updated_at"]
+
+    if new_status == OrderStatus.COMPLETED:
+        order.completed_at = timezone.now()
+        update_fields.append("completed_at")
+    elif previous_status == OrderStatus.COMPLETED:
+        order.completed_at = None
+        update_fields.append("completed_at")
+
+    order.save(update_fields=update_fields)
 
     OrderStatusChange.objects.create(
         order=order,
