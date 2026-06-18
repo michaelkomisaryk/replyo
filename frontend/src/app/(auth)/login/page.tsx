@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,20 +17,37 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    const formData = new FormData(event.currentTarget);
+    const loginEmail = String(formData.get("email") ?? email).trim();
+    const loginPassword = String(formData.get("password") ?? password);
 
-    setLoading(false);
+    try {
+      const result = await signIn("credentials", {
+        email: loginEmail,
+        password: loginPassword,
+        redirect: false,
+      });
 
-    if (result?.error) {
-      setError("Invalid email or password.");
-      return;
+      if (!result?.ok) {
+        if (result?.error === "BackendUnreachable") {
+          setError(
+            "Cannot reach the backend. Start Django with: python3 backend/manage.py runserver",
+          );
+        } else {
+          setError("Invalid email or password.");
+        }
+        return;
+      }
+
+      router.refresh();
+      router.push("/");
+    } catch {
+      setError(
+        "Cannot reach the backend. Start Django with: python3 backend/manage.py runserver",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    window.location.href = "/";
   }
 
   return (
@@ -45,7 +64,9 @@ export default function LoginPage() {
           </label>
           <input
             id="email"
+            name="email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -61,7 +82,9 @@ export default function LoginPage() {
           </label>
           <input
             id="password"
+            name="password"
             type="password"
+            autoComplete="current-password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}

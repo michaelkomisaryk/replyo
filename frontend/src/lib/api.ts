@@ -43,6 +43,23 @@ export type TeamInvitation = {
   debug_accept_url?: string;
 };
 
+export type InstagramStatus = {
+  connected: boolean;
+  username: string | null;
+  instagram_user_id: string | null;
+  connected_at: string | null;
+  token_expires_at: string | null;
+  can_manage: boolean;
+  oauth_configured: boolean;
+  mock_available: boolean;
+};
+
+export type InstagramConnectResponse = {
+  authorization_url: string | null;
+  mock_available: boolean;
+  detail?: string;
+};
+
 async function authFetch(path: string, accessToken: string, options: RequestInit = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -150,6 +167,48 @@ export async function acceptInvitation(input: {
   }
 
   return data;
+}
+
+export async function fetchInstagramStatus(
+  accessToken: string,
+): Promise<InstagramStatus> {
+  return authFetch(
+    "/api/integrations/instagram/status/",
+    accessToken,
+  ) as Promise<InstagramStatus>;
+}
+
+export async function fetchInstagramConnectUrl(
+  accessToken: string,
+): Promise<InstagramConnectResponse> {
+  return authFetch(
+    "/api/integrations/instagram/connect/",
+    accessToken,
+  ) as Promise<InstagramConnectResponse>;
+}
+
+export async function mockConnectInstagram(
+  accessToken: string,
+): Promise<InstagramStatus> {
+  return authFetch("/api/integrations/instagram/mock-connect/", accessToken, {
+    method: "POST",
+  }) as Promise<InstagramStatus>;
+}
+
+export async function disconnectInstagram(
+  accessToken: string,
+): Promise<{ message: string }> {
+  return authFetch("/api/integrations/instagram/disconnect/", accessToken, {
+    method: "POST",
+  }) as Promise<{ message: string }>;
+}
+
+export async function refreshInstagramToken(
+  accessToken: string,
+): Promise<InstagramStatus> {
+  return authFetch("/api/integrations/instagram/refresh/", accessToken, {
+    method: "POST",
+  }) as Promise<InstagramStatus>;
 }
 
 export { API_BASE_URL };

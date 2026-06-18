@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+
+import { InstagramConnectionBadge } from "@/components/InstagramConnectionBadge";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -9,6 +12,7 @@ type AppShellProps = {
 
 const navItems = [
   { href: "/", label: "Dashboard" },
+  { href: "/settings", label: "Settings" },
   { href: "#", label: "Chats" },
   { href: "#", label: "Clients" },
   { href: "#", label: "Orders" },
@@ -16,6 +20,9 @@ const navItems = [
 
 export function AppShell({ children }: AppShellProps) {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const pageTitle =
+    navItems.find((item) => item.href === pathname)?.label ?? "Dashboard";
 
   return (
     <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
@@ -31,7 +38,11 @@ export function AppShell({ children }: AppShellProps) {
             <Link
               key={item.label}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                pathname === item.href
+                  ? "bg-zinc-900 text-white"
+                  : "text-zinc-700 hover:bg-zinc-100"
+              }`}
             >
               {item.label}
             </Link>
@@ -43,9 +54,10 @@ export function AppShell({ children }: AppShellProps) {
         <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
           <div>
             <p className="text-sm text-zinc-500">Instagram shop CRM</p>
-            <h2 className="text-lg font-semibold">Dashboard</h2>
+            <h2 className="text-lg font-semibold">{pageTitle}</h2>
           </div>
           <div className="flex items-center gap-3">
+            <InstagramConnectionBadge />
             {session?.user?.email && (
               <span className="text-sm text-zinc-600">{session.user.email}</span>
             )}

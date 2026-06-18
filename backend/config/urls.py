@@ -14,6 +14,14 @@ from apps.accounts.onboarding_views import (
     InvitationListCreateView,
     OnboardingView,
 )
+from apps.integrations.views import (
+    InstagramCallbackView,
+    InstagramConnectView,
+    InstagramDisconnectView,
+    InstagramMockConnectView,
+    InstagramRefreshView,
+    InstagramStatusView,
+)
 from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientViewSet
 from apps.common.views import health_check
@@ -42,6 +50,36 @@ urlpatterns = [
         "api/invitations/accept/",
         AcceptInvitationView.as_view(),
         name="invitations-accept",
+    ),
+    path(
+        "api/integrations/instagram/status/",
+        InstagramStatusView.as_view(),
+        name="instagram-status",
+    ),
+    path(
+        "api/integrations/instagram/connect/",
+        InstagramConnectView.as_view(),
+        name="instagram-connect",
+    ),
+    path(
+        "api/integrations/instagram/mock-connect/",
+        InstagramMockConnectView.as_view(),
+        name="instagram-mock-connect",
+    ),
+    path(
+        "api/integrations/instagram/callback/",
+        InstagramCallbackView.as_view(),
+        name="instagram-callback",
+    ),
+    path(
+        "api/integrations/instagram/disconnect/",
+        InstagramDisconnectView.as_view(),
+        name="instagram-disconnect",
+    ),
+    path(
+        "api/integrations/instagram/refresh/",
+        InstagramRefreshView.as_view(),
+        name="instagram-refresh",
     ),
     path("api/", include(router.urls)),
 ]

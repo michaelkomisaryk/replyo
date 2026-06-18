@@ -2,12 +2,25 @@ from apps.accounts.invitations import TeamInvitation
 from apps.accounts.models import UserRole
 
 
+def _is_instagram_connected(shop) -> bool:
+    try:
+        from apps.integrations.models import InstagramConnection
+
+        if InstagramConnection.objects.filter(shop=shop).exists():
+            return True
+    except Exception:
+        pass
+
+    onboarding_settings = shop.settings.get("onboarding", {})
+    return bool(onboarding_settings.get("instagram_connected", False))
+
+
 def build_onboarding_checklist(shop) -> dict:
     admin = shop.members.filter(role=UserRole.ADMIN).order_by("id").first()
     onboarding_settings = shop.settings.get("onboarding", {})
 
     email_verified = bool(admin and admin.is_email_verified)
-    instagram_connected = bool(onboarding_settings.get("instagram_connected", False))
+    instagram_connected = _is_instagram_connected(shop)
     team_invited = (
         TeamInvitation.objects.filter(shop=shop).exists()
         or shop.members.count() > 1
@@ -24,7 +37,7 @@ def build_onboarding_checklist(shop) -> dict:
             "id": "instagram_connected",
             "label": "Connect Instagram account",
             "completed": instagram_connected,
-            "placeholder": True,
+            "placeholder": False,
         },
         {
             "id": "team_invited",
@@ -38,7 +51,5 @@ def build_onboarding_checklist(shop) -> dict:
         "steps": steps,
         "completed_count": sum(1 for step in steps if step["completed"]),
         "total_count": len(steps),
-        "is_complete": all(
-            step["completed"] for step in steps if not step["placeholder"]
-        ),
+        "is_complete": all(step["completed"] for step in steps),
     }

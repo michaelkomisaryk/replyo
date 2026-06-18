@@ -27,14 +27,19 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const response = await fetch(`${API_URL}/api/auth/login/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-        });
+        let response: Response;
+        try {
+          response = await fetch(`${API_URL}/api/auth/login/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
+        } catch {
+          throw new Error("BackendUnreachable");
+        }
 
         if (!response.ok) {
           return null;

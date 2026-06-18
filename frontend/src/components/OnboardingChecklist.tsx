@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { fetchOnboarding, inviteTeamMember } from "@/lib/api";
+import { InstagramSettingsLink } from "@/components/InstagramSettings";
 
 export function OnboardingChecklist() {
   const { data: session } = useSession();
@@ -93,11 +94,13 @@ export function OnboardingChecklist() {
             </span>
             <div>
               <p className="text-sm font-medium text-zinc-900">{step.label}</p>
-              {step.placeholder && !step.completed && (
-                <p className="mt-1 text-xs text-zinc-500">
-                  Instagram connection coming in a future update.
-                </p>
-              )}
+              {step.id === "instagram_connected" &&
+                !step.completed &&
+                isAdmin && (
+                  <p className="mt-1 text-xs text-zinc-500">
+                    <InstagramSettingsLink />
+                  </p>
+                )}
             </div>
           </li>
         ))}

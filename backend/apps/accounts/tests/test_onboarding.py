@@ -1,7 +1,7 @@
 import json
 
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -91,10 +91,12 @@ class OnboardingInvitationTests(TestCase):
         )
         self.assertEqual(login_response.status_code, status.HTTP_200_OK)
 
+    @override_settings(DEBUG=True, META_APP_ID="", META_APP_SECRET="")
     def test_checklist_tracks_team_invite_completion(self):
         self.admin.is_email_verified = True
         self.admin.save(update_fields=["is_email_verified"])
         self._auth(self.admin)
+        self.client.post("/api/integrations/instagram/mock-connect/")
         self.client.post(
             "/api/invitations/",
             {"email": "manager@shop.com", "role": UserRole.MANAGER},
