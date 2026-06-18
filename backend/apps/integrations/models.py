@@ -30,3 +30,26 @@ class InstagramConnection(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"@{self.instagram_username} ({self.shop.name})"
+
+
+class InstagramWebhookEvent(TimeStampedModel):
+    shop = models.ForeignKey(
+        "accounts.Shop",
+        on_delete=models.CASCADE,
+        related_name="instagram_webhook_events",
+        null=True,
+        blank=True,
+    )
+    event_id = models.CharField(max_length=255, unique=True)
+    payload = models.JSONField()
+    processed_at = models.DateTimeField(null=True, blank=True)
+    error = models.TextField(blank=True, default="")
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["processed_at"]),
+            models.Index(fields=["shop", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return self.event_id

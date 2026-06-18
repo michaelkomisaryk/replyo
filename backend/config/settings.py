@@ -123,6 +123,7 @@ META_REDIRECT_URI = os.getenv(
     "META_REDIRECT_URI",
     "http://127.0.0.1:8000/api/integrations/instagram/callback/",
 )
+META_WEBHOOK_VERIFY_TOKEN = os.getenv("META_WEBHOOK_VERIFY_TOKEN", "")
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [

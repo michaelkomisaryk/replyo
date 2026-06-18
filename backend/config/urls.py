@@ -22,6 +22,7 @@ from apps.integrations.views import (
     InstagramRefreshView,
     InstagramStatusView,
 )
+from apps.integrations.webhook_views import InstagramWebhookView
 from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientViewSet
 from apps.common.views import health_check
@@ -80,6 +81,11 @@ urlpatterns = [
         "api/integrations/instagram/refresh/",
         InstagramRefreshView.as_view(),
         name="instagram-refresh",
+    ),
+    path(
+        "api/integrations/instagram/webhook/",
+        InstagramWebhookView.as_view(),
+        name="instagram-webhook",
     ),
     path("api/", include(router.urls)),
 ]

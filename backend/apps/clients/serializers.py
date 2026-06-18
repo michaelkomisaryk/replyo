@@ -10,6 +10,7 @@ class ClientSerializer(serializers.ModelSerializer):
             "id",
             "shop",
             "instagram_username",
+            "instagram_user_id",
             "display_name",
             "notes",
             "created_at",

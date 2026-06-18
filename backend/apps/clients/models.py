@@ -10,6 +10,7 @@ class Client(TimeStampedModel):
         related_name="clients",
     )
     instagram_username = models.CharField(max_length=150)
+    instagram_user_id = models.CharField(max_length=64, blank=True, default="")
     display_name = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
 
@@ -17,11 +18,17 @@ class Client(TimeStampedModel):
         indexes = [
             models.Index(fields=["shop", "instagram_username"]),
             models.Index(fields=["shop", "display_name"]),
+            models.Index(fields=["shop", "instagram_user_id"]),
         ]
         constraints = [
             models.UniqueConstraint(
                 fields=["shop", "instagram_username"],
                 name="unique_client_instagram_per_shop",
+            ),
+            models.UniqueConstraint(
+                fields=["shop", "instagram_user_id"],
+                condition=models.Q(instagram_user_id__gt=""),
+                name="unique_client_instagram_user_id_per_shop",
             ),
         ]
 

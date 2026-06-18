@@ -53,6 +53,14 @@ class Message(TimeStampedModel):
         indexes = [
             models.Index(fields=["chat", "sent_at"]),
             models.Index(fields=["direction"]),
+            models.Index(fields=["external_id"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["external_id"],
+                condition=models.Q(external_id__gt=""),
+                name="unique_message_external_id",
+            ),
         ]
         ordering = ["sent_at"]
 
