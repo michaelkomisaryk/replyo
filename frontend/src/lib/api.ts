@@ -157,6 +157,23 @@ export type Order = {
   updated_at: string;
 };
 
+export type ChatNotification = {
+  id: number;
+  chat_id: number;
+  client_username: string;
+  client_display_name: string;
+  kind: string;
+  kind_label: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+export type NotificationListResponse = {
+  unread_count: number;
+  results: ChatNotification[];
+};
+
 async function authFetch(path: string, accessToken: string, options: RequestInit = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -513,6 +530,35 @@ export async function updateOrderStatus(
     method: "PATCH",
     body: JSON.stringify({ status }),
   }) as Promise<Order>;
+}
+
+export async function fetchNotifications(
+  accessToken: string,
+  unreadOnly = false,
+): Promise<NotificationListResponse> {
+  const path = unreadOnly
+    ? "/api/notifications/?unread=true"
+    : "/api/notifications/";
+  return authFetch(path, accessToken) as Promise<NotificationListResponse>;
+}
+
+export async function markNotificationRead(
+  accessToken: string,
+  notificationId: number,
+): Promise<ChatNotification> {
+  return authFetch(
+    `/api/notifications/${notificationId}/read/`,
+    accessToken,
+    { method: "POST" },
+  ) as Promise<ChatNotification>;
+}
+
+export async function markAllNotificationsRead(
+  accessToken: string,
+): Promise<{ marked_read: number }> {
+  return authFetch("/api/notifications/read-all/", accessToken, {
+    method: "POST",
+  }) as Promise<{ marked_read: number }>;
 }
 
 export { API_BASE_URL };

@@ -32,6 +32,8 @@ from apps.messages.views import (
     ChatAssignView,
     ChatEscalateView,
     ChatNotificationListView,
+    ChatNotificationMarkAllReadView,
+    ChatNotificationReadView,
     ChatPinView,
     ChatPrioritiesView,
     ChatReplyView,
@@ -137,6 +139,16 @@ urlpatterns = [
         "api/notifications/",
         ChatNotificationListView.as_view(),
         name="chat-notifications",
+    ),
+    path(
+        "api/notifications/read-all/",
+        ChatNotificationMarkAllReadView.as_view(),
+        name="chat-notifications-read-all",
+    ),
+    path(
+        "api/notifications/<int:notification_id>/read/",
+        ChatNotificationReadView.as_view(),
+        name="chat-notification-read",
     ),
     path(
         "api/clients/search/",

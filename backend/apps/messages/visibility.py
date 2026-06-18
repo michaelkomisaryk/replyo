@@ -6,10 +6,13 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.accounts.models import User, UserRole
 from apps.messages.models import Chat, ChatNotification, Message
-from apps.orders.models import Order, OrderStatus
+from apps.messages.notifications import (
+    notify_chat_reactivation,
+    notify_new_inbound_message,
+)
 from apps.messages.priority import ACTIVE_ORDER_STATUSES
+from apps.orders.models import Order, OrderStatus
 
 
 def get_active_message_window() -> timedelta:
@@ -146,43 +149,11 @@ def reactivate_chat(chat: Chat) -> tuple[Chat, bool]:
     return chat, was_archived
 
 
-def _notification_recipients(chat: Chat):
-    if chat.assigned_to_id:
-        return [chat.assigned_to]
-
-    return list(
-        User.objects.filter(
-            shop=chat.shop,
-            role__in={UserRole.ADMIN, UserRole.MANAGER},
-            is_active=True,
-        )
-    )
-
-
-def notify_chat_reactivation(chat: Chat) -> list[ChatNotification]:
-    client_label = chat.client.display_name or chat.client.instagram_username
-    message = f"Archived chat with {client_label} was reactivated by a new message."
-    notifications: list[ChatNotification] = []
-
-    for user in _notification_recipients(chat):
-        notifications.append(
-            ChatNotification.objects.create(
-                shop=chat.shop,
-                chat=chat,
-                user=user,
-                kind=ChatNotification.Kind.CHAT_REACTIVATED,
-                message=message,
-            )
-        )
-
-    return notifications
-
-
 def handle_inbound_message_visibility(chat: Chat) -> list[ChatNotification]:
     chat, was_archived = reactivate_chat(chat)
     if was_archived:
         return notify_chat_reactivation(chat)
-    return []
+    return notify_new_inbound_message(chat)
 
 
 def archive_stale_chats(*, shop=None, now=None) -> int:

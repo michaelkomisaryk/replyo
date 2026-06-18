@@ -101,6 +101,8 @@ class Message(TimeStampedModel):
 
 class ChatNotification(TimeStampedModel):
     class Kind(models.TextChoices):
+        NEW_MESSAGE = "new_message", "New Message"
+        WAITING_REPLY_REMINDER = "waiting_reply_reminder", "Waiting Reply Reminder"
         CHAT_REACTIVATED = "chat_reactivated", "Chat Reactivated"
         CHAT_ESCALATED = "chat_escalated", "Chat Escalated"
 

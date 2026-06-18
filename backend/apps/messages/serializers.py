@@ -79,6 +79,11 @@ class ChatNotificationSerializer(serializers.ModelSerializer):
         source="chat.client.instagram_username",
         read_only=True,
     )
+    client_display_name = serializers.CharField(
+        source="chat.client.display_name",
+        read_only=True,
+    )
+    kind_label = serializers.CharField(source="get_kind_display", read_only=True)
 
     class Meta:
         model = ChatNotification
@@ -86,7 +91,9 @@ class ChatNotificationSerializer(serializers.ModelSerializer):
             "id",
             "chat_id",
             "client_username",
+            "client_display_name",
             "kind",
+            "kind_label",
             "message",
             "is_read",
             "created_at",

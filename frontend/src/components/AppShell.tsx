@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
-import { InstagramConnectionBadge } from "@/components/InstagramConnectionBadge";
 import { ClientSearchBar } from "@/components/ClientSearchBar";
+import { InstagramConnectionBadge } from "@/components/InstagramConnectionBadge";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -62,6 +63,7 @@ export function AppShell({ children }: AppShellProps) {
           <div className="flex flex-1 flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-center lg:justify-end">
             <ClientSearchBar />
             <div className="flex items-center gap-3">
+            <NotificationBell />
             <InstagramConnectionBadge />
             {session?.user?.email && (
               <span className="text-sm text-zinc-600">{session.user.email}</span>

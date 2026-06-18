@@ -16,7 +16,8 @@ from apps.messages.serializers import (
     ChatNotificationSerializer,
     MessageSerializer,
 )
-from apps.messages.assignee import filter_chats_by_assignee, notify_chat_escalation
+from apps.messages.assignee import filter_chats_by_assignee
+from apps.messages.notifications import notify_chat_escalation
 from apps.messages.visibility import (
     archive_chat,
     filter_chats_for_view,
@@ -261,13 +262,44 @@ class ChatNotificationListView(APIView):
     permission_classes = [IsAuthenticated, IsShopMember]
 
     def get(self, request):
-        notifications = ChatNotification.objects.select_related("chat", "chat__client").filter(
+        notifications = ChatNotification.objects.select_related(
+            "chat",
+            "chat__client",
+        ).filter(
             user=request.user,
         )
         unread_only = request.query_params.get("unread")
         if unread_only in {"1", "true", "yes"}:
             notifications = notifications.filter(is_read=False)
 
-        return Response(
-            ChatNotificationSerializer(notifications[:50], many=True).data
+        serialized = ChatNotificationSerializer(notifications[:50], many=True).data
+        unread_count = ChatNotification.objects.filter(
+            user=request.user,
+            is_read=False,
+        ).count()
+        return Response({"unread_count": unread_count, "results": serialized})
+
+
+class ChatNotificationReadView(APIView):
+    permission_classes = [IsAuthenticated, IsShopMember]
+
+    def post(self, request, notification_id: int):
+        notification = get_object_or_404(
+            ChatNotification.objects.select_related("chat", "chat__client"),
+            id=notification_id,
+            user=request.user,
         )
+        notification.is_read = True
+        notification.save(update_fields=["is_read", "updated_at"])
+        return Response(ChatNotificationSerializer(notification).data)
+
+
+class ChatNotificationMarkAllReadView(APIView):
+    permission_classes = [IsAuthenticated, IsShopMember]
+
+    def post(self, request):
+        updated = ChatNotification.objects.filter(
+            user=request.user,
+            is_read=False,
+        ).update(is_read=True)
+        return Response({"marked_read": updated})

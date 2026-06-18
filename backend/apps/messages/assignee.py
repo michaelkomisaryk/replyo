@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from django.db.models import QuerySet
-
-from apps.accounts.models import User, UserRole
-from apps.messages.models import Chat, ChatNotification
+from apps.accounts.models import UserRole
 
 
-def filter_chats_by_assignee(queryset: QuerySet, *, user, assigned_to: str | None):
+def filter_chats_by_assignee(queryset, *, user, assigned_to: str | None):
+
     if not assigned_to:
         return queryset
 
@@ -28,28 +26,3 @@ def filter_chats_by_assignee(queryset: QuerySet, *, user, assigned_to: str | Non
         return queryset
 
     return queryset.filter(assigned_to_id=assignee_id)
-
-
-def notify_chat_escalation(*, chat: Chat, escalated_by: User) -> list[ChatNotification]:
-    client_label = chat.client.display_name or chat.client.instagram_username
-    message = (
-        f"{escalated_by.email} escalated the chat with {client_label} for manager review."
-    )
-    notifications: list[ChatNotification] = []
-
-    for recipient in User.objects.filter(
-        shop=chat.shop,
-        role__in={UserRole.ADMIN, UserRole.MANAGER},
-        is_active=True,
-    ):
-        notifications.append(
-            ChatNotification.objects.create(
-                shop=chat.shop,
-                chat=chat,
-                user=recipient,
-                kind=ChatNotification.Kind.CHAT_ESCALATED,
-                message=message,
-            )
-        )
-
-    return notifications
