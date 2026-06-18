@@ -37,8 +37,13 @@ def main() -> int:
     failures = 0
 
     status, payload = _get(f"{api_url}/api/health/")
-    if status == 200 and isinstance(payload, dict) and payload.get("status") == "ok":
-        print(f"OK  API health ({api_url}/api/health/)")
+    if (
+        status == 200
+        and isinstance(payload, dict)
+        and payload.get("status") == "ok"
+        and payload.get("database") == "ok"
+    ):
+        print(f"OK  API health + database ({api_url}/api/health/)")
     else:
         print(f"FAIL API health: status={status} body={payload}", file=sys.stderr)
         failures += 1

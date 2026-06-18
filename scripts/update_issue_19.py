@@ -34,28 +34,30 @@ Deploy frontend and backend per `docs/technical-requirements.md`.
 
 COMMENT = """## Progress
 
-Production deployment **configuration and docs** are on `main`. Live deploy + smoke test still required before closing this issue.
+Production deployment **configuration, docs, and verification tooling** are on `main`. A live deploy and production smoke test are still required before closing this issue.
 
-### Infrastructure added
+### Infrastructure
 - `Dockerfile` + `backend/scripts/start.sh` — migrate, collectstatic, Gunicorn
 - `render.yaml` — Render web service + PostgreSQL blueprint
 - `railway.toml` — Railway Docker deploy
 - `frontend/vercel.json` — Vercel Next.js settings
 - `docs/deployment.md` — full deploy guide (Render/Railway + Vercel)
-- Production Django settings: Whitenoise, SSL, `CSRF_TRUSTED_ORIGINS`, `DATABASE_SSL_REQUIRE`
+- Production Django settings: Whitenoise static storage, SSL, `CSRF_TRUSTED_ORIGINS`, `DATABASE_SSL_REQUIRE`
 - Updated `.env.example` and `frontend/.env.example` with prod variable templates
-- Instagram production webhook URL documented
+- Instagram production webhook URL documented in `docs/deployment.md`
 
-### Smoke test
-- `scripts/smoke_test_production.py` — health, frontend, webhook verify
+### Verification
+- `GET /api/health/` now returns `{"status":"ok","database":"ok"}` (503 if DB unreachable)
+- `scripts/smoke_test_production.py` — health + DB, frontend, optional webhook verify
 - GitHub Actions: **Production smoke test** workflow (`workflow_dispatch`)
+- Deployment config tests in `apps.common.tests.test_deployment`
 
-### Next steps (manual)
+### Remaining (manual — blocks closing)
 1. Deploy API via Render Blueprint or Railway using repo `Dockerfile`
 2. Deploy frontend to Vercel (root dir: `frontend`)
 3. Set env vars per `docs/deployment.md`
 4. Configure Meta webhook: `https://<api>/api/integrations/instagram/webhook/`
-5. Run smoke test with production URLs, then check off remaining tasks
+5. Run smoke test with production URLs; confirm migrations in deploy logs
 
 ```bash
 PRODUCTION_API_URL=https://api.your-domain.com \\
@@ -63,6 +65,8 @@ PRODUCTION_FRONTEND_URL=https://app.your-domain.com \\
 META_WEBHOOK_VERIFY_TOKEN=your-token \\
 python3 scripts/smoke_test_production.py
 ```
+
+Or run the **Production smoke test** GitHub Action with your URLs.
 """
 
 

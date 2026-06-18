@@ -109,7 +109,7 @@ python backend/manage.py sync_instagram_inbound
 
 ## Acceptance checklist
 
-- [ ] `GET https://<api>/api/health/` returns `{"status":"ok"}`
+- [ ] `GET https://<api>/api/health/` returns `{"status":"ok","database":"ok"}`
 - [ ] Frontend loads at `https://<app>/`
 - [ ] Meta webhook verification succeeds (GET challenge)
 - [ ] `migrate` completed on deploy (check Render/Railway logs)
