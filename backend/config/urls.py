@@ -26,7 +26,12 @@ from apps.integrations.webhook_views import InstagramWebhookView
 from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientCardView, ClientViewSet
 from apps.common.views import health_check
-from apps.messages.views import ChatReplyView, ChatViewSet, MessageViewSet
+from apps.messages.views import (
+    ChatPrioritiesView,
+    ChatReplyView,
+    ChatViewSet,
+    MessageViewSet,
+)
 from apps.orders.views import ChatCreateOrderView, OrderStatusHistoryView, OrderViewSet
 
 router = DefaultRouter()
@@ -91,6 +96,11 @@ urlpatterns = [
         "api/chats/<int:chat_id>/reply/",
         ChatReplyView.as_view(),
         name="chat-reply",
+    ),
+    path(
+        "api/chats/priorities/",
+        ChatPrioritiesView.as_view(),
+        name="chat-priorities",
     ),
     path(
         "api/clients/<int:client_id>/card/",

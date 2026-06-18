@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.messages.models import Chat, Message
+from apps.messages.priority import get_wait_seconds, get_wait_urgency
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -12,6 +13,9 @@ class ChatSerializer(serializers.ModelSerializer):
         source="client.display_name",
         read_only=True,
     )
+    priority_label = serializers.CharField(source="get_priority_display", read_only=True)
+    wait_seconds = serializers.SerializerMethodField()
+    wait_urgency = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
@@ -23,9 +27,18 @@ class ChatSerializer(serializers.ModelSerializer):
             "client_display_name",
             "assigned_to",
             "priority",
+            "priority_label",
+            "wait_seconds",
+            "wait_urgency",
             "created_at",
             "updated_at",
         ]
+
+    def get_wait_seconds(self, chat: Chat) -> int | None:
+        return get_wait_seconds(chat)
+
+    def get_wait_urgency(self, chat: Chat) -> str | None:
+        return get_wait_urgency(chat)
 
 
 class MessageSerializer(serializers.ModelSerializer):

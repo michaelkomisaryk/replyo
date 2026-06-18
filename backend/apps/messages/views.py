@@ -9,6 +9,7 @@ from apps.common.permissions import ChatPermission, IsShopMember
 from apps.common.viewsets import ChatQuerysetMixin
 from apps.integrations.outbound_sync import OutboundSendError, send_chat_reply
 from apps.messages.models import Chat, Message
+from apps.messages.priority import build_priority_buckets, get_waiting_reply_threshold
 from apps.messages.serializers import (
     ChatReplySerializer,
     ChatSerializer,
@@ -26,8 +27,50 @@ class ChatViewSet(ChatQuerysetMixin, viewsets.ModelViewSet):
     permission_classes = [ChatPermission]
     http_method_names = ["get", "head", "options"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        priority = self.request.query_params.get("priority")
+        if priority:
+            queryset = queryset.filter(priority=priority)
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(shop=self.request.user.shop)
+
+
+class ChatPrioritiesView(APIView):
+    permission_classes = [IsAuthenticated, IsShopMember]
+
+    def get(self, request):
+        chats = Chat.objects.select_related("client", "assigned_to").filter(
+            shop=request.user.shop
+        )
+        if request.user.role == UserRole.SUPPORT_MANAGER:
+            chats = chats.filter(assigned_to=request.user)
+
+        buckets = build_priority_buckets(chats)
+        serialized_buckets = []
+        for bucket in buckets:
+            serialized_buckets.append(
+                {
+                    "priority": bucket["priority"],
+                    "label": bucket["label"],
+                    "count": bucket["count"],
+                    "chats": ChatSerializer(
+                        bucket["chats"],
+                        many=True,
+                        context={"request": request},
+                    ).data,
+                }
+            )
+
+        threshold = get_waiting_reply_threshold()
+        return Response(
+            {
+                "wait_threshold_seconds": int(threshold.total_seconds()),
+                "buckets": serialized_buckets,
+            }
+        )
 
 
 class MessageViewSet(ChatQuerysetMixin, viewsets.ReadOnlyModelViewSet):

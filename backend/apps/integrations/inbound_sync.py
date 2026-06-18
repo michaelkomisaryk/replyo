@@ -163,6 +163,10 @@ def ingest_inbound_message(
     )
     chat.save(update_fields=["updated_at"])
 
+    from apps.messages.priority import recalculate_chat_priority
+
+    recalculate_chat_priority(chat)
+
     InstagramWebhookEvent.objects.filter(event_id=inbound.event_id).update(
         processed_at=timezone.now(),
         error="",

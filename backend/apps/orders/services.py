@@ -3,30 +3,11 @@ from __future__ import annotations
 from apps.messages.models import Chat
 from apps.orders.models import Order, OrderStatus, OrderStatusChange
 
-ACTIVE_ORDER_STATUSES = {
-    OrderStatus.NEW_CLIENT,
-    OrderStatus.WAITING_PAYMENT,
-    OrderStatus.PAID,
-    OrderStatus.SENT,
-}
+from apps.messages.priority import recalculate_chat_priority as _recalculate_chat_priority
 
 
 def sync_chat_priority(chat: Chat) -> Chat:
-    latest_order = (
-        Order.objects.filter(chat=chat).order_by("-updated_at", "-id").first()
-    )
-    if not latest_order:
-        return chat
-
-    if latest_order.status == OrderStatus.COMPLETED:
-        chat.priority = Chat.Priority.COMPLETED_ORDERS
-    elif latest_order.status == OrderStatus.REJECTED:
-        chat.priority = Chat.Priority.REJECTED
-    elif latest_order.status in ACTIVE_ORDER_STATUSES:
-        chat.priority = Chat.Priority.ACTIVE_ORDERS
-
-    chat.save(update_fields=["priority", "updated_at"])
-    return chat
+    return _recalculate_chat_priority(chat)
 
 
 def create_order_for_chat(

@@ -146,4 +146,8 @@ def send_chat_reply(*, chat: Chat, content: str) -> Message:
             "updated_at",
         ]
     )
+
+    from apps.messages.priority import recalculate_chat_priority
+
+    recalculate_chat_priority(chat)
     return message
