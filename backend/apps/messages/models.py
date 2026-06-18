@@ -102,6 +102,7 @@ class Message(TimeStampedModel):
 class ChatNotification(TimeStampedModel):
     class Kind(models.TextChoices):
         CHAT_REACTIVATED = "chat_reactivated", "Chat Reactivated"
+        CHAT_ESCALATED = "chat_escalated", "Chat Escalated"
 
     shop = models.ForeignKey(
         "accounts.Shop",

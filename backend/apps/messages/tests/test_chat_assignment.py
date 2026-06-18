@@ -6,7 +6,8 @@ from django.test import TestCase
 
 from apps.accounts.models import Shop, User, UserRole
 from apps.clients.models import Client
-from apps.messages.models import Chat
+from apps.messages.models import Chat, ChatNotification, Message, MessageDirection
+from django.utils import timezone
 
 
 class ChatAssignmentTests(TestCase):
@@ -79,3 +80,90 @@ class ChatAssignmentTests(TestCase):
         self._auth(self.support)
         response = self.api.post(f"/api/chats/{self.chat.id}/escalate/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_filter_chats_by_assignee(self):
+        assigned = Chat.objects.create(
+            shop=self.shop,
+            client=Client.objects.create(
+                shop=self.shop,
+                instagram_username="assigned_one",
+                display_name="Assigned One",
+            ),
+            assigned_to=self.support,
+        )
+        Chat.objects.create(
+            shop=self.shop,
+            client=Client.objects.create(
+                shop=self.shop,
+                instagram_username="unassigned_one",
+                display_name="Unassigned One",
+            ),
+        )
+
+        self._auth(self.admin)
+        response = self.api.get(f"/api/chats/?view=all&assigned_to={self.support.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ids = {chat["id"] for chat in response.data}
+        self.assertEqual(ids, {assigned.id})
+
+    def test_priorities_endpoint_filters_by_assignee(self):
+        self.chat.assigned_to = self.manager
+        self.chat.save(update_fields=["assigned_to"])
+        Message.objects.create(
+            chat=self.chat,
+            direction=MessageDirection.INBOUND,
+            content="hello",
+            sent_at=timezone.now(),
+        )
+
+        self._auth(self.admin)
+        response = self.api.get(f"/api/chats/priorities/?assigned_to={self.manager.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        chat_ids = {
+            chat["id"]
+            for bucket in response.data["buckets"]
+            for chat in bucket["chats"]
+        }
+        self.assertEqual(chat_ids, {self.chat.id})
+
+    def test_escalate_notifies_managers(self):
+        self.chat.assigned_to = self.support
+        self.chat.save(update_fields=["assigned_to"])
+
+        self._auth(self.support)
+        response = self.api.post(f"/api/chats/{self.chat.id}/escalate/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        notifications = ChatNotification.objects.filter(
+            chat=self.chat,
+            kind=ChatNotification.Kind.CHAT_ESCALATED,
+        )
+        self.assertEqual(notifications.count(), 2)
+        recipients = {notification.user_id for notification in notifications}
+        self.assertEqual(recipients, {self.admin.id, self.manager.id})
+
+    def test_support_manager_only_sees_assigned_chats_in_list(self):
+        assigned = Chat.objects.create(
+            shop=self.shop,
+            client=Client.objects.create(
+                shop=self.shop,
+                instagram_username="support_chat",
+                display_name="Support Chat",
+            ),
+            assigned_to=self.support,
+        )
+        Chat.objects.create(
+            shop=self.shop,
+            client=Client.objects.create(
+                shop=self.shop,
+                instagram_username="other_chat",
+                display_name="Other Chat",
+            ),
+            assigned_to=self.manager,
+        )
+
+        self._auth(self.support)
+        response = self.api.get("/api/chats/?view=all")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ids = {chat["id"] for chat in response.data}
+        self.assertEqual(ids, {assigned.id})

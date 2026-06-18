@@ -16,6 +16,7 @@ from apps.messages.serializers import (
     ChatNotificationSerializer,
     MessageSerializer,
 )
+from apps.messages.assignee import filter_chats_by_assignee, notify_chat_escalation
 from apps.messages.visibility import (
     archive_chat,
     filter_chats_for_view,
@@ -41,6 +42,12 @@ class ChatViewSet(ChatQuerysetMixin, viewsets.ModelViewSet):
         priority = self.request.query_params.get("priority")
         if priority:
             queryset = queryset.filter(priority=priority)
+
+        queryset = filter_chats_by_assignee(
+            queryset,
+            user=self.request.user,
+            assigned_to=self.request.query_params.get("assigned_to"),
+        )
         return queryset
 
     def perform_create(self, serializer):
@@ -58,6 +65,11 @@ class ChatPrioritiesView(APIView):
             chats = chats.filter(assigned_to=request.user)
 
         chats = filter_chats_for_view(chats, "active")
+        chats = filter_chats_by_assignee(
+            chats,
+            user=request.user,
+            assigned_to=request.query_params.get("assigned_to"),
+        )
 
         buckets = build_priority_buckets(chats)
         serialized_buckets = []
@@ -229,14 +241,16 @@ class ChatEscalateView(APIView):
             )
 
         chat = get_object_or_404(
-            Chat.objects.select_related("assigned_to").filter(
+            Chat.objects.select_related("assigned_to", "client").filter(
                 shop=request.user.shop,
                 assigned_to=request.user,
             ),
             id=chat_id,
         )
+        escalated_by = request.user
         chat.assigned_to = None
         chat.save(update_fields=["assigned_to", "updated_at"])
+        notify_chat_escalation(chat=chat, escalated_by=escalated_by)
         chat = Chat.objects.select_related("assigned_to", "client", "shop").get(
             pk=chat.pk
         )

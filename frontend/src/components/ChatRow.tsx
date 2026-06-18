@@ -36,7 +36,10 @@ export function ChatRow({ chat }: ChatRowProps) {
             </span>
           )}
         </div>
-        <p className="truncate text-xs text-zinc-500">@{chat.client_username}</p>
+        <p className="truncate text-xs text-zinc-500">
+          @{chat.client_username}
+          {chat.assigned_to_email ? ` · ${chat.assigned_to_email}` : " · Unassigned"}
+        </p>
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">

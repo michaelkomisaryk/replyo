@@ -304,6 +304,7 @@ export async function fetchChats(
   options: {
     view?: ChatListView;
     priority?: string;
+    assignedTo?: string;
   } = {},
 ): Promise<Chat[]> {
   const params = new URLSearchParams();
@@ -313,6 +314,9 @@ export async function fetchChats(
   if (options.priority) {
     params.set("priority", options.priority);
   }
+  if (options.assignedTo) {
+    params.set("assigned_to", options.assignedTo);
+  }
 
   const query = params.toString();
   const path = query ? `/api/chats/?${query}` : "/api/chats/";
@@ -321,8 +325,17 @@ export async function fetchChats(
 
 export async function fetchChatPriorities(
   accessToken: string,
+  options: { assignedTo?: string } = {},
 ): Promise<ChatPrioritiesResponse> {
-  return authFetch("/api/chats/priorities/", accessToken) as Promise<ChatPrioritiesResponse>;
+  const params = new URLSearchParams();
+  if (options.assignedTo) {
+    params.set("assigned_to", options.assignedTo);
+  }
+  const query = params.toString();
+  const path = query
+    ? `/api/chats/priorities/?${query}`
+    : "/api/chats/priorities/";
+  return authFetch(path, accessToken) as Promise<ChatPrioritiesResponse>;
 }
 
 export type TeamMember = {

@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchChatPriorities, fetchChats, type Chat } from "@/lib/api";
 import { PRIORITY_SECTION_ORDER } from "@/lib/chat-utils";
 
+import { AssigneeFilter, type AssigneeFilterValue } from "@/components/AssigneeFilter";
+
 import { ChatRow } from "@/components/ChatRow";
 import { ChatDashboardSkeleton } from "@/components/ChatListSkeleton";
 
@@ -161,23 +163,31 @@ function PriorityBucketsView({
   );
 }
 
-function FilteredChatList({ filter }: { filter: Exclude<DashboardFilter, "all"> }) {
+function FilteredChatList({
+  filter,
+  assignedTo,
+}: {
+  filter: Exclude<DashboardFilter, "all">;
+  assignedTo: AssigneeFilterValue;
+}) {
   const { data: session } = useSession();
   const accessToken = session?.accessToken;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["chats", filter, accessToken],
+    queryKey: ["chats", filter, assignedTo, accessToken],
     queryFn: () => {
+      const assignee = assignedTo || undefined;
       if (filter === "active_orders") {
         return fetchChats(accessToken!, {
           view: "active",
           priority: "active_orders",
+          assignedTo: assignee,
         });
       }
       if (filter === "archived") {
-        return fetchChats(accessToken!, { view: "archived" });
+        return fetchChats(accessToken!, { view: "archived", assignedTo: assignee });
       }
-      return fetchChats(accessToken!, { view: "rejected" });
+      return fetchChats(accessToken!, { view: "rejected", assignedTo: assignee });
     },
     enabled: Boolean(accessToken),
   });
@@ -205,20 +215,27 @@ export function ChatDashboard() {
   const { data: session } = useSession();
   const accessToken = session?.accessToken;
   const [filter, setFilter] = useState<DashboardFilter>("all");
+  const [assignedTo, setAssignedTo] = useState<AssigneeFilterValue>("");
 
   const {
     data: priorities,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["chat-priorities", accessToken],
-    queryFn: () => fetchChatPriorities(accessToken!),
+    queryKey: ["chat-priorities", assignedTo, accessToken],
+    queryFn: () =>
+      fetchChatPriorities(accessToken!, {
+        assignedTo: assignedTo || undefined,
+      }),
     enabled: Boolean(accessToken) && filter === "all",
   });
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <FilterTabs active={filter} onChange={setFilter} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <FilterTabs active={filter} onChange={setFilter} />
+        <AssigneeFilter value={assignedTo} onChange={setAssignedTo} />
+      </div>
 
       {filter === "all" ? (
         !accessToken || isLoading ? (
@@ -231,7 +248,7 @@ export function ChatDashboard() {
           <PriorityBucketsView buckets={priorities?.buckets ?? []} />
         )
       ) : (
-        <FilteredChatList filter={filter} />
+        <FilteredChatList filter={filter} assignedTo={assignedTo} />
       )}
     </div>
   );
