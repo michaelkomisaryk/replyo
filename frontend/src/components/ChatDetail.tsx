@@ -51,6 +51,7 @@ export function ChatDetail({ chatId }: ChatDetailProps) {
   function refreshMessages() {
     void queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     void queryClient.invalidateQueries({ queryKey: ["chats"] });
+    void queryClient.invalidateQueries({ queryKey: ["chat-priorities"] });
   }
 
   if (!accessToken || chatQuery.isLoading || messagesQuery.isLoading) {

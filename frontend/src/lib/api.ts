@@ -68,9 +68,30 @@ export type Chat = {
   client_display_name: string;
   assigned_to: number | null;
   priority: string;
+  priority_label: string;
+  wait_seconds: number | null;
+  wait_urgency: "yellow" | "orange" | "red" | null;
+  is_pinned: boolean;
+  is_archived: boolean;
+  archived_at: string | null;
+  has_new_message_badge: boolean;
   created_at: string;
   updated_at: string;
 };
+
+export type ChatPriorityBucket = {
+  priority: string;
+  label: string;
+  count: number;
+  chats: Chat[];
+};
+
+export type ChatPrioritiesResponse = {
+  wait_threshold_seconds: number;
+  buckets: ChatPriorityBucket[];
+};
+
+export type ChatListView = "active" | "archived" | "rejected" | "all";
 
 export type Message = {
   id: number;
@@ -277,8 +298,30 @@ export async function refreshInstagramToken(
   }) as Promise<InstagramStatus>;
 }
 
-export async function fetchChats(accessToken: string): Promise<Chat[]> {
-  return authFetch("/api/chats/", accessToken) as Promise<Chat[]>;
+export async function fetchChats(
+  accessToken: string,
+  options: {
+    view?: ChatListView;
+    priority?: string;
+  } = {},
+): Promise<Chat[]> {
+  const params = new URLSearchParams();
+  if (options.view) {
+    params.set("view", options.view);
+  }
+  if (options.priority) {
+    params.set("priority", options.priority);
+  }
+
+  const query = params.toString();
+  const path = query ? `/api/chats/?${query}` : "/api/chats/";
+  return authFetch(path, accessToken) as Promise<Chat[]>;
+}
+
+export async function fetchChatPriorities(
+  accessToken: string,
+): Promise<ChatPrioritiesResponse> {
+  return authFetch("/api/chats/priorities/", accessToken) as Promise<ChatPrioritiesResponse>;
 }
 
 export async function fetchChat(

@@ -1,0 +1,24 @@
+name: Close Issue 14
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/close-issue-14.yml
+      - scripts/update_issue_14.py
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  close-issue-14:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update and close issue #14
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update_issue_14.py
