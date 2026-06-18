@@ -1,0 +1,23 @@
+name: Update Issue 19
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/update_issue_19.py
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  update-issue-19:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update issue #19 (no auto-close)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/update_issue_19.py

@@ -86,6 +86,16 @@ npm run dev
 
 Open `http://127.0.0.1:3000`. The dashboard shell should render and show backend connection status from `/api/health/`.
 
+## Production deployment
+
+See [docs/deployment.md](docs/deployment.md) for Render/Railway (API + PostgreSQL) and Vercel (frontend) setup, Instagram webhook configuration, and smoke tests.
+
+```bash
+PRODUCTION_API_URL=https://api.your-domain.com \
+PRODUCTION_FRONTEND_URL=https://app.your-domain.com \
+python3 scripts/smoke_test_production.py
+```
+
 Copy `frontend/.env.example` to `frontend/.env.local` and set `NEXTAUTH_SECRET` before running the frontend.
 
 Unauthenticated users are redirected to `/login`. Sign up at `/signup`, verify email via `/verify-email`, then sign in.

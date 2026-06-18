@@ -1,0 +1,27 @@
+name: Production smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: Production API URL (e.g. https://api.example.com)
+        required: true
+      frontend_url:
+        description: Production frontend URL (optional)
+        required: false
+      webhook_verify_token:
+        description: META_WEBHOOK_VERIFY_TOKEN (optional)
+        required: false
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run production smoke test
+        env:
+          PRODUCTION_API_URL: ${{ inputs.api_url }}
+          PRODUCTION_FRONTEND_URL: ${{ inputs.frontend_url }}
+          META_WEBHOOK_VERIFY_TOKEN: ${{ inputs.webhook_verify_token }}
+        run: python3 scripts/smoke_test_production.py

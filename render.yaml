@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: replyo-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health/
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: replyo-db
+          property: connectionString
+      - key: DATABASE_SSL_REQUIRE
+        value: "true"
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "true"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: META_REDIRECT_URI
+        sync: false
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        generateValue: true
+
+databases:
+  - name: replyo-db
