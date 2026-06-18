@@ -26,7 +26,7 @@ from apps.integrations.webhook_views import InstagramWebhookView
 from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientViewSet
 from apps.common.views import health_check
-from apps.messages.views import ChatViewSet, MessageViewSet
+from apps.messages.views import ChatReplyView, ChatViewSet, MessageViewSet
 from apps.orders.views import OrderViewSet
 
 router = DefaultRouter()
@@ -86,6 +86,11 @@ urlpatterns = [
         "api/integrations/instagram/webhook/",
         InstagramWebhookView.as_view(),
         name="instagram-webhook",
+    ),
+    path(
+        "api/chats/<int:chat_id>/reply/",
+        ChatReplyView.as_view(),
+        name="chat-reply",
     ),
     path("api/", include(router.urls)),
 ]

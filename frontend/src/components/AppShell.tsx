@@ -12,8 +12,8 @@ type AppShellProps = {
 
 const navItems = [
   { href: "/", label: "Dashboard" },
+  { href: "/chats", label: "Chats" },
   { href: "/settings", label: "Settings" },
-  { href: "#", label: "Chats" },
   { href: "#", label: "Clients" },
   { href: "#", label: "Orders" },
 ];
@@ -21,8 +21,9 @@ const navItems = [
 export function AppShell({ children }: AppShellProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const pageTitle =
-    navItems.find((item) => item.href === pathname)?.label ?? "Dashboard";
+  const pageTitle = pathname.startsWith("/chats/")
+    ? "Chat"
+    : navItems.find((item) => item.href === pathname)?.label ?? "Dashboard";
 
   return (
     <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
@@ -39,7 +40,8 @@ export function AppShell({ children }: AppShellProps) {
               key={item.label}
               href={item.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                pathname === item.href
+                pathname === item.href ||
+                (item.href === "/chats" && pathname.startsWith("/chats"))
                   ? "bg-zinc-900 text-white"
                   : "text-zinc-700 hover:bg-zinc-100"
               }`}

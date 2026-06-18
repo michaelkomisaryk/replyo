@@ -38,6 +38,12 @@ class MessageDirection(models.TextChoices):
     OUTBOUND = "outbound", "Outbound"
 
 
+class MessageDeliveryStatus(models.TextChoices):
+    SENDING = "sending", "Sending"
+    SENT = "sent", "Sent"
+    FAILED = "failed", "Failed"
+
+
 class Message(TimeStampedModel):
     chat = models.ForeignKey(
         Chat,
@@ -48,6 +54,13 @@ class Message(TimeStampedModel):
     content = models.TextField()
     sent_at = models.DateTimeField()
     external_id = models.CharField(max_length=255, blank=True)
+    delivery_status = models.CharField(
+        max_length=16,
+        choices=MessageDeliveryStatus.choices,
+        blank=True,
+        default="",
+    )
+    delivery_error = models.TextField(blank=True, default="")
 
     class Meta:
         indexes = [

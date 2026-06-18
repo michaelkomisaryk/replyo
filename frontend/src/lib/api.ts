@@ -60,6 +60,38 @@ export type InstagramConnectResponse = {
   detail?: string;
 };
 
+export type Chat = {
+  id: number;
+  shop: number;
+  client: number;
+  client_username: string;
+  client_display_name: string;
+  assigned_to: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Message = {
+  id: number;
+  chat: number;
+  direction: "inbound" | "outbound";
+  content: string;
+  sent_at: string;
+  external_id: string;
+  delivery_status: "" | "sending" | "sent" | "failed";
+  delivery_error: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SendReplyResponse = Message;
+
+export type SendReplyError = {
+  detail: string;
+  retryable?: boolean;
+  message?: Message;
+};
+
 async function authFetch(path: string, accessToken: string, options: RequestInit = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -209,6 +241,63 @@ export async function refreshInstagramToken(
   return authFetch("/api/integrations/instagram/refresh/", accessToken, {
     method: "POST",
   }) as Promise<InstagramStatus>;
+}
+
+export async function fetchChats(accessToken: string): Promise<Chat[]> {
+  return authFetch("/api/chats/", accessToken) as Promise<Chat[]>;
+}
+
+export async function fetchChat(
+  accessToken: string,
+  chatId: number,
+): Promise<Chat> {
+  return authFetch(`/api/chats/${chatId}/`, accessToken) as Promise<Chat>;
+}
+
+export async function fetchMessages(
+  accessToken: string,
+  chatId: number,
+): Promise<Message[]> {
+  return authFetch(
+    `/api/messages/?chat=${chatId}`,
+    accessToken,
+  ) as Promise<Message[]>;
+}
+
+export async function sendChatReply(
+  accessToken: string,
+  chatId: number,
+  content: string,
+): Promise<SendReplyResponse> {
+  return authFetch(`/api/chats/${chatId}/reply/`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  }) as Promise<SendReplyResponse>;
+}
+
+export async function sendChatReplySafe(
+  accessToken: string,
+  chatId: number,
+  content: string,
+): Promise<{ ok: true; message: Message } | { ok: false; error: SendReplyError }> {
+  const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}/reply/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ content }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: data as SendReplyError,
+    };
+  }
+
+  return { ok: true, message: data as Message };
 }
 
 export { API_BASE_URL };

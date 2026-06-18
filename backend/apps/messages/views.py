@@ -1,10 +1,19 @@
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.accounts.models import UserRole
-from apps.common.permissions import ChatPermission
+from apps.common.permissions import ChatPermission, IsShopMember
 from apps.common.viewsets import ChatQuerysetMixin
+from apps.integrations.outbound_sync import OutboundSendError, send_chat_reply
 from apps.messages.models import Chat, Message
-from apps.messages.serializers import ChatSerializer, MessageSerializer
+from apps.messages.serializers import (
+    ChatReplySerializer,
+    ChatSerializer,
+    MessageSerializer,
+)
 
 
 class ChatViewSet(ChatQuerysetMixin, viewsets.ModelViewSet):
@@ -31,5 +40,59 @@ class MessageViewSet(ChatQuerysetMixin, viewsets.ReadOnlyModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
         if user.role == UserRole.SUPPORT_MANAGER:
-            return queryset.filter(chat__assigned_to=user)
+            queryset = queryset.filter(chat__assigned_to=user)
+
+        chat_id = self.request.query_params.get("chat")
+        if chat_id:
+            queryset = queryset.filter(chat_id=chat_id)
         return queryset
+
+
+class ChatReplyView(APIView):
+    permission_classes = [IsAuthenticated, IsShopMember]
+
+    def post(self, request, chat_id: int):
+        chats = Chat.objects.select_related("client", "shop").filter(
+            shop=request.user.shop
+        )
+        if request.user.role == UserRole.SUPPORT_MANAGER:
+            chats = chats.filter(assigned_to=request.user)
+
+        chat = get_object_or_404(chats, id=chat_id)
+
+        serializer = ChatReplySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            message = send_chat_reply(
+                chat=chat,
+                content=serializer.validated_data["content"],
+            )
+        except OutboundSendError as exc:
+            status_code = (
+                status.HTTP_429_TOO_MANY_REQUESTS
+                if exc.status_code == 429
+                else status.HTTP_400_BAD_REQUEST
+            )
+            payload = {"detail": exc.message}
+            if exc.retryable:
+                payload["retryable"] = True
+
+            failed_message = (
+                Message.objects.filter(
+                    chat=chat,
+                    direction="outbound",
+                    delivery_status="failed",
+                )
+                .order_by("-created_at")
+                .first()
+            )
+            if failed_message:
+                payload["message"] = MessageSerializer(failed_message).data
+
+            return Response(payload, status=status_code)
+
+        return Response(
+            MessageSerializer(message).data,
+            status=status.HTTP_201_CREATED,
+        )
