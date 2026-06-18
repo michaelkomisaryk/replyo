@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClientCardPanel } from "@/components/ClientCardPanel";
+import { OrderStatusPanel } from "@/components/OrderStatusPanel";
 import { ReplyComposer } from "@/components/ReplyComposer";
 import { fetchChat, fetchMessages } from "@/lib/api";
 
@@ -86,6 +87,12 @@ export function ChatDetail({ chatId }: ChatDetailProps) {
           </h3>
           <p className="text-sm text-zinc-500">@{chat.client_username}</p>
         </div>
+
+        <OrderStatusPanel
+          accessToken={accessToken}
+          chatId={chatId}
+          chatPriority={chat.priority}
+        />
 
         <div className="flex-1 space-y-3 overflow-y-auto p-5">
           {messages.length === 0 ? (

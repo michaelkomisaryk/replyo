@@ -27,7 +27,7 @@ from apps.accounts.views import ShopViewSet, UserViewSet
 from apps.clients.views import ClientCardView, ClientViewSet
 from apps.common.views import health_check
 from apps.messages.views import ChatReplyView, ChatViewSet, MessageViewSet
-from apps.orders.views import OrderViewSet
+from apps.orders.views import ChatCreateOrderView, OrderStatusHistoryView, OrderViewSet
 
 router = DefaultRouter()
 router.register("shops", ShopViewSet, basename="shop")
@@ -96,6 +96,16 @@ urlpatterns = [
         "api/clients/<int:client_id>/card/",
         ClientCardView.as_view(),
         name="client-card",
+    ),
+    path(
+        "api/chats/<int:chat_id>/orders/",
+        ChatCreateOrderView.as_view(),
+        name="chat-create-order",
+    ),
+    path(
+        "api/orders/<int:order_id>/history/",
+        OrderStatusHistoryView.as_view(),
+        name="order-status-history",
     ),
     path("api/", include(router.urls)),
 ]

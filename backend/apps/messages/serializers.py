@@ -22,6 +22,7 @@ class ChatSerializer(serializers.ModelSerializer):
             "client_username",
             "client_display_name",
             "assigned_to",
+            "priority",
             "created_at",
             "updated_at",
         ]

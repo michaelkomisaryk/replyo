@@ -5,6 +5,13 @@ from apps.common.models import TimeStampedModel
 
 
 class Chat(TimeStampedModel):
+    class Priority(models.TextChoices):
+        NEW_CLIENTS = "new_clients", "New Clients"
+        WAITING_REPLY = "waiting_reply", "Waiting for Reply"
+        ACTIVE_ORDERS = "active_orders", "Active Orders"
+        COMPLETED_ORDERS = "completed_orders", "Completed Orders"
+        REJECTED = "rejected", "Rejected Clients"
+
     shop = models.ForeignKey(
         "accounts.Shop",
         on_delete=models.CASCADE,
@@ -22,11 +29,17 @@ class Chat(TimeStampedModel):
         null=True,
         blank=True,
     )
+    priority = models.CharField(
+        max_length=32,
+        choices=Priority.choices,
+        default=Priority.NEW_CLIENTS,
+    )
 
     class Meta:
         indexes = [
             models.Index(fields=["shop", "client"]),
             models.Index(fields=["shop", "assigned_to"]),
+            models.Index(fields=["shop", "priority"]),
         ]
 
     def __str__(self) -> str:

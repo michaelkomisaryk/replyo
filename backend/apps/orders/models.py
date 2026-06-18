@@ -45,3 +45,29 @@ class Order(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"Order {self.pk} ({self.get_status_display()})"
+
+
+class OrderStatusChange(TimeStampedModel):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="status_changes",
+    )
+    from_status = models.CharField(max_length=32, blank=True, default="")
+    to_status = models.CharField(max_length=32, choices=OrderStatus.choices)
+    changed_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_status_changes",
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["order", "created_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Order {self.order_id}: {self.from_status} -> {self.to_status}"

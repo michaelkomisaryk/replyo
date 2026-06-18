@@ -67,6 +67,7 @@ export type Chat = {
   client_username: string;
   client_display_name: string;
   assigned_to: number | null;
+  priority: string;
   created_at: string;
   updated_at: string;
 };
@@ -110,6 +111,17 @@ export type ClientCard = {
   notes: string;
   orders: ClientOrderSummary[];
   can_edit: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Order = {
+  id: number;
+  shop: number;
+  client: number;
+  chat: number | null;
+  status: string;
+  status_label: string;
   created_at: string;
   updated_at: string;
 };
@@ -341,6 +353,38 @@ export async function updateClientNotes(
     method: "PATCH",
     body: JSON.stringify({ notes }),
   }) as Promise<ClientCard>;
+}
+
+export async function fetchChatOrders(
+  accessToken: string,
+  chatId: number,
+): Promise<Order[]> {
+  return authFetch(
+    `/api/orders/?chat=${chatId}`,
+    accessToken,
+  ) as Promise<Order[]>;
+}
+
+export async function createChatOrder(
+  accessToken: string,
+  chatId: number,
+  status: string = "waiting_payment",
+): Promise<Order> {
+  return authFetch(`/api/chats/${chatId}/orders/`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ status }),
+  }) as Promise<Order>;
+}
+
+export async function updateOrderStatus(
+  accessToken: string,
+  orderId: number,
+  status: string,
+): Promise<Order> {
+  return authFetch(`/api/orders/${orderId}/`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  }) as Promise<Order>;
 }
 
 export { API_BASE_URL };
