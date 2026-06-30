@@ -1,6 +1,7 @@
 services:
   - type: web
     name: replyo-api
+    plan: free
     runtime: docker
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health/
@@ -36,3 +37,4 @@ services:
 
 databases:
   - name: replyo-db
+    plan: free
