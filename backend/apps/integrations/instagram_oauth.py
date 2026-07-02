@@ -23,7 +23,6 @@ AUTH_SCOPES = ",".join(
         "instagram_manage_messages",
         "pages_show_list",
         "pages_read_engagement",
-        "pages_manage_metadata",
         "business_management",
     ]
 )
