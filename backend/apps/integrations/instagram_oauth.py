@@ -17,7 +17,7 @@ from apps.integrations.token_store import decrypt_token, encrypt_token
 STATE_SALT = "instagram-oauth-state"
 GRAPH_API_VERSION = "v21.0"
 GRAPH_BASE_URL = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
-AUTH_SCOPES = ",".join(
+OAUTH_SCOPES = ",".join(
     [
         "instagram_basic",
         "instagram_manage_messages",
