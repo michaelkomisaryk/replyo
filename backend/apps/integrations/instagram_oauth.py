@@ -216,10 +216,7 @@ def save_connection(
     shop.settings["onboarding"] = onboarding_settings
     shop.save(update_fields=["settings", "updated_at"])
 
-    # АВТОМАТИЧНА ПІДПИСКА НА ВЕБХУКИ ПРИ ПІДКЛЮЧЕННІ
-    _subscribe_page_to_webhook(
-        page_id=account.page_id, page_access_token=account.access_token
-    )
+    
 
     connection, _created = InstagramConnection.objects.update_or_create(
         shop=shop,
