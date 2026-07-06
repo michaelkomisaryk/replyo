@@ -166,31 +166,44 @@ def _expires_at(expires_in: int | None):
 
 
 def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
-    """Автоматично підписує додаток на вебхуки повідомлень для Facebook-сторінки."""
+    """Примусово підписує додаток на вебхуки повідомлень через сторінку."""
     if page_id.startswith("mock_"):
         return {"success": True}
 
-    # Змінюємо url: додаємо page_id замість "me"
+    # Повертаємося до url з конкретним page_id
     url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/{page_id}/subscribed_apps"
 
-    app_access_token = f"{settings.META_APP_ID}|{settings.META_APP_SECRET}"
+    # Передаємо параметри як JSON-ready dict
+    payload = {
+        "subscribed_fields": ["messages"],  # Meta часто хоче масив або рядок
+        "access_token": page_access_token,
+    }
 
-    data = urllib.parse.urlencode(
-        {
-            "subscribed_fields": "messages",
-            "access_token": app_access_token,
-        }
-    ).encode("utf-8")
+    # Перетворюємо у JSON-строку та кодуємо в байти
+    data = json.dumps(payload).encode("utf-8")
 
     request = urllib.request.Request(
-        url, data=data, headers={"User-Agent": "replyo-integrations"}
+        url,
+        data=data,
+        headers={
+            "User-Agent": "replyo-integrations",
+            "Content-Type": "application/json",  # Чітко вказуємо тип даних JSON
+        },
     )
+
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             res_data = json.loads(response.read().decode())
             print(f"🎉 Webhook subscription success: {res_data}")
             return res_data
     except Exception as exc:
+        # Спробуємо витягнути деталі помилки з відповіді сервера, якщо вони є
+        if hasattr(exc, "read"):
+            try:
+                error_detail = exc.read().decode()
+                print(f"❌ Meta API error details: {error_detail}")
+            except Exception:
+                pass
         print(f"⚠️ Webhook subscription failed: {exc}")
         return {"success": False, "error": str(exc)}
         
