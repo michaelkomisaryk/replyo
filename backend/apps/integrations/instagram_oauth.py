@@ -165,45 +165,6 @@ def _expires_at(expires_in: int | None):
     return timezone.now() + timedelta(seconds=expires_in)
 
 
-def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
-    """Примусово підписує додаток на вебхуки повідомлень через Instagram API."""
-    if page_id.startswith("mock_"):
-        return {"success": True}
-
-    # ВАЖЛИВО: Для Instagram-додатків запит шлеться на /me/subscribed_apps
-    # але через ТОКЕН СТОРІНКИ, яка зв'язана з Instagram.
-    url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/me/subscribed_apps"
-
-    # Параметри передаємо як звичайні URL-параметри (Query), бо Meta для /me/
-    # вимагає саме класичний POST-формат або параметри в URL.
-    params = {
-        "subscribed_fields": "messages",
-        "access_token": page_access_token,
-    }
-
-    query = urllib.parse.urlencode(params)
-    full_url = f"{url}?{query}"
-
-    # Передаємо порожній data=b"", щоб urllib зробив саме POST запит
-    request = urllib.request.Request(
-        full_url, data=b"", headers={"User-Agent": "replyo-integrations"}
-    )
-
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            res_data = json.loads(response.read().decode())
-            print(f"🎉 Instagram Webhook subscription success: {res_data}")
-            return res_data
-    except Exception as exc:
-        if hasattr(exc, "read"):
-            try:
-                error_detail = exc.read().decode()
-                print(f"❌ Meta API error details: {error_detail}")
-            except Exception:
-                pass
-        print(f"⚠️ Webhook subscription failed: {exc}")
-        return {"success": False, "error": str(exc)}
-        
 def save_connection(
     *,
     shop,
@@ -215,8 +176,6 @@ def save_connection(
     onboarding_settings["instagram_connected"] = True
     shop.settings["onboarding"] = onboarding_settings
     shop.save(update_fields=["settings", "updated_at"])
-
-    
 
     connection, _created = InstagramConnection.objects.update_or_create(
         shop=shop,
