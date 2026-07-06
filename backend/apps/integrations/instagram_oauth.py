@@ -23,7 +23,6 @@ OAUTH_SCOPES = ",".join(
         "instagram_manage_messages",
         "pages_show_list",
         "pages_read_engagement",
-        "pages_messaging",  # <--- ДОДАЛИ НАШ ГОЛОВНИЙ ДОЗВІЛ
         "business_management",
     ]
 )
@@ -167,38 +166,35 @@ def _expires_at(expires_in: int | None):
 
 
 def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
-    """Примусово підписує додаток на вебхуки повідомлень через сторінку."""
+    """Примусово підписує додаток на вебхуки повідомлень через Instagram API."""
     if page_id.startswith("mock_"):
         return {"success": True}
 
-    # Повертаємося до url з конкретним page_id
-    url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/{page_id}/subscribed_apps"
+    # ВАЖЛИВО: Для Instagram-додатків запит шлеться на /me/subscribed_apps
+    # але через ТОКЕН СТОРІНКИ, яка зв'язана з Instagram.
+    url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/me/subscribed_apps"
 
-    # Передаємо параметри як JSON-ready dict
-    payload = {
-        "subscribed_fields": ["messages"],  # Meta часто хоче масив або рядок
+    # Параметри передаємо як звичайні URL-параметри (Query), бо Meta для /me/
+    # вимагає саме класичний POST-формат або параметри в URL.
+    params = {
+        "subscribed_fields": "messages",
         "access_token": page_access_token,
     }
 
-    # Перетворюємо у JSON-строку та кодуємо в байти
-    data = json.dumps(payload).encode("utf-8")
+    query = urllib.parse.urlencode(params)
+    full_url = f"{url}?{query}"
 
+    # Передаємо порожній data=b"", щоб urllib зробив саме POST запит
     request = urllib.request.Request(
-        url,
-        data=data,
-        headers={
-            "User-Agent": "replyo-integrations",
-            "Content-Type": "application/json",  # Чітко вказуємо тип даних JSON
-        },
+        full_url, data=b"", headers={"User-Agent": "replyo-integrations"}
     )
 
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
             res_data = json.loads(response.read().decode())
-            print(f"🎉 Webhook subscription success: {res_data}")
+            print(f"🎉 Instagram Webhook subscription success: {res_data}")
             return res_data
     except Exception as exc:
-        # Спробуємо витягнути деталі помилки з відповіді сервера, якщо вони є
         if hasattr(exc, "read"):
             try:
                 error_detail = exc.read().decode()
