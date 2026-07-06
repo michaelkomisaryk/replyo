@@ -1,3 +1,4 @@
+import json
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
@@ -33,20 +34,21 @@ class InstagramWebhookView(APIView):
         payload_bytes = request.body
         signature = request.META.get("HTTP_X_HUB_SIGNATURE_256")
 
+        # Перевірка підпису безпеки від Meta
         if settings.META_APP_SECRET and not verify_webhook_signature(
             payload_bytes,
             signature,
         ):
+            print("❌ ПОМИЛКА: Неправильний підпис запиту (Signature) від Meta!")
             return Response(
                 {"detail": "Invalid webhook signature."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        # Парсинг JSON-даних
         try:
             payload = request.data if isinstance(request.data, dict) else {}
             if not payload and payload_bytes:
-                import json
-
                 payload = json.loads(payload_bytes.decode("utf-8"))
         except (UnicodeDecodeError, ValueError):
             return Response(
@@ -54,5 +56,10 @@ class InstagramWebhookView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # === ЦЕЙ ПРИНТ ОБОВ'ЯЗКОВО З'ЯВИТЬСЯ В ЛОГАХ RENDER ===
+        print("🚀 УСПІХ! НАМ ПРИЛЕТІВ ВЕБХУК ВІД META:", json.dumps(payload, indent=2))
+
+        # Передаємо повідомлення далі в твою систему синхронізації
         process_webhook_payload(payload)
+        
         return Response({"status": "ok"})
