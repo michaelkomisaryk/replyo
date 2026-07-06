@@ -170,16 +170,15 @@ def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
     if page_id.startswith("mock_"):
         return {"success": True}
 
+    # Змінюємо url: додаємо page_id замість "me"
     url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/{page_id}/subscribed_apps"
 
-    # Формуємо App Access Token (ідентифікатор_додатку|секрет_додатку)
-    # Це дає запиту найвищі права адміністратора додатка
     app_access_token = f"{settings.META_APP_ID}|{settings.META_APP_SECRET}"
 
     data = urllib.parse.urlencode(
         {
             "subscribed_fields": "messages",
-            "access_token": app_access_token,  # Шлемо токен додатка замість токена сторінки
+            "access_token": app_access_token,
         }
     ).encode("utf-8")
 
@@ -194,7 +193,7 @@ def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
     except Exception as exc:
         print(f"⚠️ Webhook subscription failed: {exc}")
         return {"success": False, "error": str(exc)}
-
+        
 def save_connection(
     *,
     shop,
