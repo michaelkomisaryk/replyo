@@ -23,6 +23,7 @@ OAUTH_SCOPES = ",".join(
         "instagram_manage_messages",
         "pages_show_list",
         "pages_read_engagement",
+        "pages_messaging",  # <--- ДОДАЛИ НАШ ГОЛОВНИЙ ДОЗВІЛ
         "business_management",
     ]
 )
