@@ -1,8 +1,6 @@
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -190,31 +188,3 @@ class InstagramRefreshView(APIView):
             return Response({"detail": exc.message}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(get_connection_status(shop=shop, can_manage=True))
-
-
-# === НОВИЙ КОД ДЛЯ ОБРОБКИ ВЕБХУКІВ ===
-@method_decorator(csrf_exempt, name="dispatch")
-class InstagramWebhookView(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        """Метод для верифікації вебхука в кабінеті Meta Developers"""
-        mode = request.GET.get("hub.mode")
-        token = request.GET.get("hub.verify_token")
-        challenge = request.GET.get("hub.challenge")
-
-        # Перевіряємо токен безпеки з налаштувань (які прописані в Render)
-        if mode == "subscribe" and token == settings.META_WEBHOOK_VERIFY_TOKEN:
-            return HttpResponse(challenge)
-
-        return Response(
-            {"detail": "Invalid verify token"}, status=status.HTTP_403_FORBIDDEN
-        )
-
-    def post(self, request):
-        """Метод для отримання самих повідомлень від Meta"""
-        data = request.data
-        print("!!! НАМ ПРИЛЕТІВ ВЕБХУК ВІД META !!!:", data)
-
-        # Сюди у майбутньому додамо збереження повідомлень в базу даних
-        return HttpResponse("EVENT_RECEIVED", status=status.HTTP_200_OK)
