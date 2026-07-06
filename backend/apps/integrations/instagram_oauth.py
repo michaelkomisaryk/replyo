@@ -165,6 +165,30 @@ def _expires_at(expires_in: int | None):
     return timezone.now() + timedelta(seconds=expires_in)
 
 
+def _subscribe_page_to_webhook(page_id: str, page_access_token: str) -> dict:
+    """Автоматично підписує додаток на вебхуки повідомлень для Facebook-сторінки."""
+    if page_id.startswith("mock_"):
+        return {"success": True}
+
+    url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/{page_id}/subscribed_apps"
+    data = urllib.parse.urlencode(
+        {
+            "subscribed_fields": "messages",
+            "access_token": page_access_token,
+        }
+    ).encode("utf-8")
+
+    request = urllib.request.Request(
+        url, data=data, headers={"User-Agent": "replyo-integrations"}
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.loads(response.read().decode())
+    except Exception as exc:
+        print(f"⚠️ Webhook subscription failed: {exc}")
+        return {"success": False, "error": str(exc)}
+
+
 def save_connection(
     *,
     shop,
@@ -176,6 +200,11 @@ def save_connection(
     onboarding_settings["instagram_connected"] = True
     shop.settings["onboarding"] = onboarding_settings
     shop.save(update_fields=["settings", "updated_at"])
+
+    # АВТОМАТИЧНА ПІДПИСКА НА ВЕБХУКИ ПРИ ПІДКЛЮЧЕННІ
+    _subscribe_page_to_webhook(
+        page_id=account.page_id, page_access_token=account.access_token
+    )
 
     connection, _created = InstagramConnection.objects.update_or_create(
         shop=shop,
