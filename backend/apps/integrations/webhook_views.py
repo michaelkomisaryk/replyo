@@ -39,7 +39,7 @@ class InstagramWebhookView(APIView):
             payload_bytes,
             signature,
         ):
-            print("❌ ПОМИЛКА: Неправильний підпис запиту (Signature) від Meta!")
+            print("❌ ERROR: Invalid request signature from Meta!")
             return Response(
                 {"detail": "Invalid webhook signature."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -57,7 +57,7 @@ class InstagramWebhookView(APIView):
             )
 
         # === ЦЕЙ ПРИНТ ОБОВ'ЯЗКОВО З'ЯВИТЬСЯ В ЛОГАХ RENDER ===
-        print("🚀 УСПІХ! НАМ ПРИЛЕТІВ ВЕБХУК ВІД META:", json.dumps(payload, indent=2))
+        print("🚀 SUCCESS! WEBHOOK RECEIVED FROM META:", json.dumps(payload, indent=2))
 
         # Передаємо повідомлення далі в твою систему синхронізації
         process_webhook_payload(payload)
