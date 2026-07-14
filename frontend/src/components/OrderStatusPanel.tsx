@@ -58,6 +58,7 @@ export function OrderStatusPanel({
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: ["chat-orders", chatId] });
+    await queryClient.invalidateQueries({ queryKey: ["orders"] });
     await queryClient.invalidateQueries({ queryKey: ["client-card"] });
     await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     await queryClient.invalidateQueries({ queryKey: ["chats"] });

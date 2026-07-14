@@ -28,7 +28,7 @@ def _get(url: str) -> tuple[int, dict | str]:
 def main() -> int:
     api_url = os.environ.get("PRODUCTION_API_URL", "").rstrip("/")
     frontend_url = os.environ.get("PRODUCTION_FRONTEND_URL", "").rstrip("/")
-    webhook_token = os.environ.get("META_WEBHOOK_VERIFY_TOKEN", "")
+    webhook_token = os.environ.get("META_WEBHOOK_VERIFY_TOKEN", "eq5KQjsCGu01SD8AYYOuez6DU0sM4JBf")
 
     if not api_url:
         print("ERROR: Set PRODUCTION_API_URL", file=sys.stderr)

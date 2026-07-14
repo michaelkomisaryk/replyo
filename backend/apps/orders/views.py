@@ -7,7 +7,7 @@ from apps.accounts.models import UserRole
 from apps.common.permissions import IsAdminOrManager, IsShopMember, OrderPermission
 from apps.common.viewsets import ShopQuerysetMixin
 from apps.messages.models import Chat
-from apps.orders.models import Order
+from apps.orders.models import Order, OrderStatus
 from apps.orders.serializers import (
     OrderCreateSerializer,
     OrderSerializer,
@@ -15,7 +15,6 @@ from apps.orders.serializers import (
     OrderStatusUpdateSerializer,
 )
 from apps.orders.services import create_order_for_chat, update_order_status
-from apps.orders.models import Order, OrderStatus
 
 
 class OrderViewSet(ShopQuerysetMixin, viewsets.ModelViewSet):
@@ -31,10 +30,13 @@ class OrderViewSet(ShopQuerysetMixin, viewsets.ModelViewSet):
         queryset = super().get_queryset()
         client_id = self.request.query_params.get("client")
         chat_id = self.request.query_params.get("chat")
+        status_filter = self.request.query_params.get("status")
         if client_id:
             queryset = queryset.filter(client_id=client_id)
         if chat_id:
             queryset = queryset.filter(chat_id=chat_id)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
         return queryset
 
     def create(self, request, *args, **kwargs):

@@ -36,6 +36,14 @@ class OrderStatusChangeSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     status_label = serializers.CharField(source="get_status_display", read_only=True)
+    client_username = serializers.CharField(
+        source="client.instagram_username",
+        read_only=True,
+    )
+    client_display_name = serializers.CharField(
+        source="client.display_name",
+        read_only=True,
+    )
 
     class Meta:
         model = Order
@@ -43,6 +51,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "id",
             "shop",
             "client",
+            "client_username",
+            "client_display_name",
             "chat",
             "status",
             "status_label",

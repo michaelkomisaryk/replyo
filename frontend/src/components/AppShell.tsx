@@ -16,8 +16,8 @@ const navItems = [
   { href: "/", label: "Dashboard" },
   { href: "/chats", label: "Chats" },
   { href: "/settings", label: "Settings" },
-  { href: "#", label: "Clients" },
-  { href: "#", label: "Orders" },
+  { href: "/clients", label: "Clients" },
+  { href: "/orders", label: "Orders" },
 ];
 
 export function AppShell({ children }: AppShellProps) {

@@ -146,10 +146,23 @@ export type ClientSearchResult = {
   assigned_to_email: string | null;
 };
 
+export type Client = {
+  id: number;
+  shop: number;
+  instagram_username: string;
+  instagram_user_id: string;
+  display_name: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Order = {
   id: number;
   shop: number;
   client: number;
+  client_username: string;
+  client_display_name: string;
   chat: number | null;
   status: string;
   status_label: string;
@@ -478,6 +491,10 @@ export async function fetchClientCard(
   ) as Promise<ClientCard>;
 }
 
+export async function fetchClients(accessToken: string): Promise<Client[]> {
+  return authFetch("/api/clients/", accessToken) as Promise<Client[]>;
+}
+
 export async function searchClients(
   accessToken: string,
   query: string,
@@ -508,6 +525,19 @@ export async function fetchChatOrders(
     `/api/orders/?chat=${chatId}`,
     accessToken,
   ) as Promise<Order[]>;
+}
+
+export async function fetchOrders(
+  accessToken: string,
+  options: { status?: string } = {},
+): Promise<Order[]> {
+  const params = new URLSearchParams();
+  if (options.status) {
+    params.set("status", options.status);
+  }
+  const query = params.toString();
+  const path = query ? `/api/orders/?${query}` : "/api/orders/";
+  return authFetch(path, accessToken) as Promise<Order[]>;
 }
 
 export async function createChatOrder(

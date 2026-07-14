@@ -248,6 +248,25 @@ export function InstagramSettings() {
           Meta OAuth in production.
         </p>
       )}
+
+      {data.connected && !data.oauth_configured && data.can_manage && (
+        <div className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <p className="font-medium">Development mock is active</p>
+          <p className="mt-1 text-blue-800">
+            Real Instagram DMs require Meta app credentials and a public webhook URL.
+            In dev, simulate a customer DM with:
+          </p>
+          <code className="mt-2 block rounded bg-white px-2 py-1 text-xs text-blue-900">
+            python3 backend/manage.py simulate_instagram_inbound -u YOUR_CUSTOMER_USERNAME
+          </code>
+          <p className="mt-2 text-xs text-blue-800">
+            Your connected account (@{data.username}) is the shop inbox — use{" "}
+            <code className="rounded bg-white px-1">-u</code> for the customer who
+            messages you. Retry failed webhooks with{" "}
+            <code className="rounded bg-white px-1">sync_instagram_inbound</code>.
+          </p>
+        </div>
+      )}
     </section>
   );
 }
