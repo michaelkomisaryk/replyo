@@ -64,7 +64,7 @@ def send_instagram_text_message(
             "message": {"text": text},
         }
     ).encode("utf-8")
-    url = f"{GRAPH_BASE_URL}/v25.0/me/messages"
+    url = f"{GRAPH_BASE_URL}/me/messages"
     request = urllib.request.Request(
         url,
         data=payload,
