@@ -34,16 +34,16 @@ class InstagramWebhookView(APIView):
         payload_bytes = request.body
         signature = request.META.get("HTTP_X_HUB_SIGNATURE_256")
 
-        # Перевірка підпису безпеки від Meta
-        if settings.META_APP_SECRET and not verify_webhook_signature(
-            payload_bytes,
-            signature,
-        ):
-            print("❌ ERROR: Invalid request signature from Meta!")
-            return Response(
-                {"detail": "Invalid webhook signature."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        # # Перевірка підпису безпеки від Meta
+        # if settings.META_APP_SECRET and not verify_webhook_signature(
+        #     payload_bytes,
+        #     signature,
+        # ):
+        #     print("❌ ERROR: Invalid request signature from Meta!")
+        #     return Response(
+        #         {"detail": "Invalid webhook signature."},
+        #         status=status.HTTP_403_FORBIDDEN,
+        #     )
 
         # Парсинг JSON-даних
         try:
