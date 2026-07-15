@@ -51,7 +51,8 @@ class InstagramWebhookView(APIView):
             if not payload and payload_bytes:
                 payload = json.loads(payload_bytes.decode("utf-8"))
         except (UnicodeDecodeError, ValueError):
-            return Response(
+            print("❌ ERROR: Invalid JSON payload.")
+            return Respongitse(
                 {"detail": "Invalid JSON payload."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
